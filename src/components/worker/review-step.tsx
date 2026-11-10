@@ -1,0 +1,276 @@
+"use client";
+import { Check, LocateFixed, Mic, Pencil } from "lucide-react";
+import type { ReactNode } from "react";
+import { useOnboardingStore, type FixField } from "@/stores/onboarding-store";
+import { MicButton } from "@/components/ui/mic-button";
+import { SpeakButton, useAutoSpeak } from "@/components/ui/speak-button";
+import { PriceStepper } from "@/components/ui/price-stepper";
+import { AiBadge } from "@/components/ui/ai-badge";
+import { Spinner } from "@/components/ui/spinner";
+import { TRADES, TRADE_LIST } from "@/lib/trades";
+import { AREAS, AREA_BY_ID } from "@/lib/areas";
+import { P, profileSentence } from "@/lib/phrases";
+
+function cleanName(text: string): string {
+  return text
+    .replace(/^(mera naam|mera nam|my name is|میرا نام)\s*/i, "")
+    .replace(/\s*(hai|ہے|ہیں)\.?$/i, "")
+    .trim()
+    .slice(0, 60);
+}
+
+/** One profile field as a big tappable card. Generic UI primitive (props allowed). */
+function FieldCard({
+  field,
+  icon,
+  labelUr,
+  value,
+  speak,
+  children,
+}: {
+  field: Exclude<FixField, null>;
+  icon: string;
+  labelUr: string;
+  value: ReactNode | null;
+  speak: string | null;
+  children: ReactNode;
+}) {
+  const fixing = useOnboardingStore((s) => s.fixing);
+  const setFixing = useOnboardingStore((s) => s.setFixing);
+  const open = fixing === field;
+  const missing = value == null;
+  return (
+    <div className={`rounded-3xl bg-white shadow-sm ring-1 ${missing ? "ring-2 ring-red-300" : "ring-line"}`}>
+      <div className="flex items-center gap-3 p-3">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-bg text-2xl" aria-hidden>{icon}</span>
+        <button className="flex min-w-0 flex-1 flex-col items-start text-right" onClick={() => setFixing(open ? null : field)}>
+          <span className="urdu text-sm text-muted" lang="ur">{labelUr}</span>
+          <span className="w-full truncate text-xl font-bold">
+            {missing ? <span className="urdu text-base font-normal text-red-700" lang="ur">{P.missing.ur}</span> : value}
+          </span>
+        </button>
+        {speak && <SpeakButton ur={speak} size="sm" />}
+        <button
+          aria-label="Edit"
+          onClick={() => setFixing(open ? null : field)}
+          className={`flex size-11 items-center justify-center rounded-full ${open ? "bg-brand text-white" : "bg-zinc-100"}`}
+        >
+          <Pencil className="size-5" />
+        </button>
+      </div>
+      {open && <div className="border-t border-line p-3">{children}</div>}
+    </div>
+  );
+}
+
+function NameFix() {
+  const setField = useOnboardingStore((s) => s.setField);
+  const setFixing = useOnboardingStore((s) => s.setFixing);
+  const name = useOnboardingStore((s) => s.draft.name);
+  return (
+    <div className="flex items-center gap-3">
+      <MicButton
+        id="fix-name"
+        size="md"
+        onDone={(r) => {
+          const n = cleanName(r.text);
+          if (!n) return;
+          if (/[؀-ۿ]/.test(n)) setField("nameUr", n);
+          else setField("name", n);
+          setFixing(null);
+        }}
+      />
+      <input
+        dir="auto"
+        value={name}
+        onChange={(e) => setField("name", e.target.value)}
+        placeholder="Name"
+        className="min-w-0 flex-1 rounded-2xl bg-bg px-3 py-3 text-lg outline-none ring-1 ring-line"
+      />
+    </div>
+  );
+}
+
+function TradeFix() {
+  const trade = useOnboardingStore((s) => s.draft.trade);
+  const setField = useOnboardingStore((s) => s.setField);
+  const setFixing = useOnboardingStore((s) => s.setFixing);
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {TRADE_LIST.map((t) => (
+        <button
+          key={t.id}
+          onClick={() => {
+            setField("trade", t.id);
+            setFixing(null);
+          }}
+          className={`flex flex-col items-center rounded-2xl p-2 ${trade === t.id ? "bg-brand text-white" : "bg-bg"}`}
+        >
+          <span className="text-3xl" aria-hidden>{t.emoji}</span>
+          <span className="urdu text-xs leading-6" lang="ur">{t.ur}</span>
+          <span className="text-[10px] opacity-70" dir="ltr">{t.en}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function YearsFix() {
+  const years = useOnboardingStore((s) => s.draft.experienceYears);
+  const setField = useOnboardingStore((s) => s.setField);
+  return (
+    <div className="flex items-center justify-between" dir="ltr">
+      <button className="size-14 rounded-2xl bg-brand/10 text-3xl font-bold text-brand" onClick={() => setField("experienceYears", Math.max(0, (years ?? 1) - 1))}>
+        −
+      </button>
+      <span className="text-4xl font-black tabular-nums">
+        {years ?? 0} <span className="urdu text-lg font-normal" lang="ur">سال</span>
+      </span>
+      <button className="size-14 rounded-2xl bg-brand/10 text-3xl font-bold text-brand" onClick={() => setField("experienceYears", (years ?? 0) + 1)}>
+        +
+      </button>
+    </div>
+  );
+}
+
+function AreaFix() {
+  const areaId = useOnboardingStore((s) => s.draft.areaId);
+  const setField = useOnboardingStore((s) => s.setField);
+  const setFixing = useOnboardingStore((s) => s.setFixing);
+  const locateMe = useOnboardingStore((s) => s.locateMe);
+  const locating = useOnboardingStore((s) => s.locating);
+  return (
+    <div className="flex flex-col gap-3">
+      <button onClick={() => void locateMe()} className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-brand text-white">
+        {locating ? <Spinner /> : <LocateFixed className="size-6" />}
+        <span className="urdu text-lg" lang="ur">میری لوکیشن لیں</span>
+      </button>
+      <div className="grid max-h-64 grid-cols-3 gap-2 overflow-y-auto">
+        {AREAS.map((a) => (
+          <button
+            key={a.id}
+            onClick={() => {
+              setField("areaId", a.id);
+              setField("lat", null);
+              setField("lng", null);
+              setFixing(null);
+            }}
+            className={`rounded-xl px-2 py-1.5 text-sm ${areaId === a.id ? "bg-brand text-white" : "bg-bg"}`}
+          >
+            <span className="block font-semibold" dir="ltr">{a.en}</span>
+            <span className="urdu block text-xs leading-6" lang="ur">{a.ur}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChargeFix() {
+  const fee = useOnboardingStore((s) => s.draft.visitCharge);
+  const setField = useOnboardingStore((s) => s.setField);
+  return <PriceStepper value={fee ?? 500} onChange={(n) => setField("visitCharge", n)} />;
+}
+
+export function ReviewStep() {
+  const draft = useOnboardingStore((s) => s.draft);
+  const source = useOnboardingStore((s) => s.source);
+  const setStep = useOnboardingStore((s) => s.setStep);
+  const setFixing = useOnboardingStore((s) => s.setFixing);
+  const missing = useOnboardingStore((s) => s.missing)();
+  useAutoSpeak(P.review.ur, P.review.hi);
+
+  const trade = draft.trade ? TRADES[draft.trade] : null;
+  const area = draft.areaId ? AREA_BY_ID[draft.areaId] : null;
+  const displayName = draft.nameUr || draft.name;
+  const summary = profileSentence({
+    name: displayName,
+    tradeUr: trade?.ur ?? null,
+    years: draft.experienceYears,
+    areaUr: area?.ur ?? null,
+    fee: draft.visitCharge,
+  });
+
+  return (
+    <div className="flex flex-1 flex-col gap-3" dir="rtl">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="urdu text-2xl font-bold" lang="ur">آپ کی پروفائل</h1>
+          <div className="flex items-center gap-2" dir="ltr">
+            <span className="text-xs text-muted">Check each box · tap ✏️ to fix</span>
+            <AiBadge source={source} />
+          </div>
+        </div>
+        <SpeakButton ur={summary || P.review.ur} size="lg" label="Read my profile" />
+      </div>
+
+      <FieldCard field="name" icon="👤" labelUr="نام" value={displayName || null} speak={displayName ? `آپ کا نام ${displayName} ہے` : null}>
+        <NameFix />
+      </FieldCard>
+      <FieldCard
+        field="trade"
+        icon={trade?.emoji ?? "🔧"}
+        labelUr="کام"
+        value={trade ? <span className="urdu" lang="ur">{trade.ur}</span> : null}
+        speak={trade ? `آپ کا کام ${trade.ur} ہے` : null}
+      >
+        <TradeFix />
+      </FieldCard>
+      <FieldCard
+        field="experience"
+        icon="📅"
+        labelUr="تجربہ"
+        value={draft.experienceYears != null ? <span>{draft.experienceYears} <span className="urdu text-base" lang="ur">سال</span></span> : null}
+        speak={draft.experienceYears != null ? `${draft.experienceYears} سال کا تجربہ` : null}
+      >
+        <YearsFix />
+      </FieldCard>
+      <FieldCard
+        field="area"
+        icon="📍"
+        labelUr="علاقہ"
+        value={area ? <span>{area.en} · <span className="urdu text-base" lang="ur">{area.ur}</span></span> : null}
+        speak={area ? `علاقہ ${area.ur}` : null}
+      >
+        <AreaFix />
+      </FieldCard>
+      <FieldCard
+        field="charge"
+        icon="💰"
+        labelUr="آنے کی فیس"
+        value={draft.visitCharge != null ? <span dir="ltr">Rs {draft.visitCharge.toLocaleString("en-PK")}</span> : null}
+        speak={draft.visitCharge != null ? `آنے کی فیس ${draft.visitCharge} روپے` : null}
+      >
+        <ChargeFix />
+      </FieldCard>
+
+      {draft.skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5" dir="ltr">
+          {draft.skills.map((s) => (
+            <span key={s} className="rounded-full bg-white px-3 py-1 text-xs font-medium ring-1 ring-line">{s}</span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-auto flex flex-col gap-2 pt-2">
+        <button
+          onClick={() => {
+            if (missing.length) {
+              const f = missing[0];
+              setFixing(f === "name" ? "name" : f === "trade" ? "trade" : f === "experienceYears" ? "experience" : f === "areaId" ? "area" : "charge");
+              return;
+            }
+            setStep("photo");
+          }}
+          className={`flex h-20 items-center justify-center gap-3 rounded-3xl text-white shadow-lg active:scale-[0.98] ${missing.length ? "bg-zinc-400" : "bg-ok"}`}
+        >
+          <Check className="size-10" strokeWidth={3} />
+          <span className="urdu text-2xl font-bold" lang="ur">سب ٹھیک ہے</span>
+        </button>
+        <button onClick={() => setStep("speak")} className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-line">
+          <Mic className="size-5" /> <span className="urdu" lang="ur">دوبارہ بولیں</span>
+        </button>
+      </div>
+    </div>
+  );
+}

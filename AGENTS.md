@@ -7,3 +7,23 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Project rules: Roshan Rozgar
+
+### Stack (do not swap without discussion)
+Next.js (App Router, Cache Components) · TypeScript · Tailwind CSS v4 · Zod · Drizzle ORM · Supabase **as a Postgres database only** · Better Auth · Zustand · OpenRouter (free models) · Vercel. Use **npm** and **Node**.
+
+- Supabase is only the database host. Do **not** add `@supabase/*` client libraries, Supabase Auth, Storage or Realtime. All backend logic lives in our own route handlers under `src/app/api/**` and services under `src/server/**`.
+- All database access goes through Drizzle (`src/server/db`). Schema lives in `src/db/schema.ts`.
+- Validate every request body and every AI response with Zod (`src/lib/validation.ts`, `src/server/ai/schemas.ts`).
+
+### State management: Zustand, and **no prop drilling**
+- **Prop drilling is not allowed.** If a value would have to pass through a component that does not use it itself, put it in a Zustand store under `src/stores/` and read it with a selector where it is needed.
+- Shared/screen-level state (session, onboarding draft, search results, job thread, recorder state, toasts) lives in Zustand stores. Do not lift it into a parent and pass it down.
+- Props are acceptable only for (a) generic UI primitives in `src/components/ui/` (e.g. `<BigButton onClick>`), and (b) a list rendering its own direct child item (`<WorkerCard worker={w} />`), where the child uses the prop itself and does not forward it further.
+- Route params are read with `useParams()` inside the client screen, not passed down from `page.tsx`.
+- Use selectors (`useStore((s) => s.x)`) rather than subscribing to the whole store.
+
+### AI usage
+- The OpenRouter key is free-tier (~50 free-model requests/day). Every AI call goes through `src/server/ai/client.ts`, which caches by input hash, logs to `ai_calls`, and falls back to a deterministic parser. Never call OpenRouter from the browser.
+- UI must label AI vs fallback output honestly (the judges penalise mocked features presented as real).
