@@ -25,7 +25,9 @@ Next.js (App Router, Cache Components) · TypeScript · Tailwind CSS v4 · Zod �
 - Use selectors (`useStore((s) => s.x)`) rather than subscribing to the whole store.
 
 ### AI usage
-- The OpenRouter key is free-tier (~50 free-model requests/day). Every AI call goes through `src/server/ai/client.ts`, which caches by input hash, logs to `ai_calls`, and falls back to a deterministic parser. Never call OpenRouter from the browser.
+- AI runs on the **Vercel AI SDK** (`ai`, `generateText` + `Output.object`) with the **OpenRouter provider** (`@openrouter/ai-sdk-provider`, key in `OPENROUTER_API_KEY`). Do not call OpenRouter with raw `fetch`.
+- Every AI call goes through `aiObject()` in `src/server/ai/client.ts` (input-hash cache in `ai_calls`, model fallback chain, quota circuit-breaker, salvage of near-miss JSON) and pairs a strict `*Wire` schema with a lenient `*Schema` normaliser from `src/server/ai/schemas.ts`. Each task in `src/server/ai/tasks.ts` must keep a deterministic fallback. Never call AI from the browser.
+- The key is free-tier (~50 free-model requests/day). OpenRouter also refuses **audio input** unless the account holds ≥ $0.50 credit, so server-side transcription only works with credit; browser speech recognition is the primary path.
 - UI must label AI vs fallback output honestly (the judges penalise mocked features presented as real).
 
 ### Design system (monochrome, editorial)

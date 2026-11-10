@@ -11,8 +11,7 @@ export const POST = route(async (req) => {
   const { mediaId } = await parseBody(req, z.object({ mediaId: z.uuid() }));
   const [m] = await db.select().from(media).where(eq(media.id, mediaId)).limit(1);
   if (!m || m.ownerUserId !== u.id || m.kind !== "audio") throw new HttpError(404, "Audio not found");
-  const format = m.mime.includes("mp4") ? "mp4" : m.mime.includes("ogg") ? "ogg" : m.mime.includes("wav") ? "wav" : "webm";
-  const res = await transcribeAudio({ base64: m.data.toString("base64"), format });
+  const res = await transcribeAudio({ data: m.data, mediaType: m.mime });
   if (!res.ok) throw new HttpError(503, res.quotaExhausted ? "AI quota reached for today" : "Could not transcribe", "ai_unavailable");
   return json({ transcript: res.data.transcript, language: res.data.language });
 });

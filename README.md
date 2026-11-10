@@ -36,7 +36,7 @@ It is built for **workers who don't read or type comfortably**. A worker joins b
 - **Zod v4** for every request body and every AI response
 - **Drizzle ORM** + **postgres.js** on **Supabase Postgres** (used purely as a database; RLS enabled on all tables to close the Supabase Data API)
 - **Better Auth** with the phone-number (OTP) plugin
-- **OpenRouter** (free models) for all AI
+- **Vercel AI SDK** (`ai` v7: `generateText` + `Output.object` with Zod schemas) on the **OpenRouter** provider (`@openrouter/ai-sdk-provider`, free models)
 - **Leaflet / react-leaflet** with OpenStreetMap tiles
 - **Vercel** (functions pinned to `hnd1`, next to the Tokyo database pooler)
 
@@ -59,11 +59,13 @@ drizzle/          SQL migrations
 | Service | Model(s) | Used for |
 |---|---|---|
 | OpenRouter | `nvidia/nemotron-3.5-super-vl:free` (primary), `google/gemma-4-31b-it:free`, `openrouter/free` (fallback chain) | Worker profile extraction, problem triage (text + **photo**), message translation + price detection, review summaries |
-| OpenRouter | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | Server-side speech-to-text, only when the browser has no speech recognition (e.g. Firefox) |
+| OpenRouter | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | Server-side speech-to-text, only when the browser has no speech recognition (e.g. Firefox). **Note:** OpenRouter rejects audio input unless the account holds ≥ $0.50 credit, so this path is inactive on a zero-balance key. |
 | Browser Web Speech API | device/browser engine (`ur-PK`, `en-US`) | Live speech-to-text (free & unlimited) |
 | Browser speechSynthesis | device voices (Urdu, else Hindi) | Read-aloud of prompts, profiles, job summaries and messages |
 
-**Quota-aware design.** The provided OpenRouter key is free-tier (**50 free-model requests/day**). All AI goes through `src/server/ai/client.ts`, which:
+**How AI is called.** Every task uses the Vercel AI SDK: `generateText({ model: openrouter.chat(id), output: Output.object({ schema }) })`, so the model is constrained by a JSON schema (OpenRouter `response_format: json_schema`) and the SDK validates the reply. Each task has a strict *wire* schema for the model and a lenient Zod *normaliser* (`src/server/ai/schemas.ts`); if a free model drifts from the schema, the raw reply is salvaged through the normaliser instead of failing, and providers without JSON-schema support are retried in JSON mode.
+
+**Quota-aware design.** The provided OpenRouter key is free-tier (**50 free-model requests/day**). All AI goes through `aiObject()` in `src/server/ai/client.ts`, which:
 caches results by input hash in the `ai_calls` table · tries the next model on upstream 429/5xx · stops calling for 10 minutes after the daily quota is hit · validates output with Zod (and discards "Urdu" fields that come back in Roman script) · never throws — each task has a deterministic fallback (keyword trade classifier, Urdu/Roman-Urdu spoken-number parser, area matcher, template review summary). The UI labels every AI-derived item honestly: **AI**, **Basic (AI offline)** or **Seeded**. Adding $10 of OpenRouter credit raises the free-model limit to 1,000/day.
 
 ## What is seeded, simulated or mocked

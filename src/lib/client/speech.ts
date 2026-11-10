@@ -37,7 +37,9 @@ export function recorderSupported(): boolean {
 }
 
 export function pickRecorderMime(): string {
-  const options = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+  // Prefer containers the server-side audio model accepts (Ogg/MP4); Chrome only offers WebM,
+  // but Chrome also has built-in speech recognition, so it rarely needs server transcription.
+  const options = ["audio/ogg;codecs=opus", "audio/mp4", "audio/webm;codecs=opus", "audio/webm"];
   for (const m of options) if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(m)) return m;
   return "";
 }

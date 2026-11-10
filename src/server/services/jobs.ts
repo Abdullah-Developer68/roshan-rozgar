@@ -274,8 +274,7 @@ export async function postMessage(jobId: string, viewer: Viewer, input: z.infer<
   if (input.kind === "voice" && !text && input.audioMediaId) {
     const [m] = await db.select().from(media).where(eq(media.id, input.audioMediaId)).limit(1);
     if (m) {
-      const format = m.mime.includes("mp4") || m.mime.includes("m4a") ? "mp4" : m.mime.includes("ogg") ? "ogg" : m.mime.includes("wav") ? "wav" : "webm";
-      const t = await transcribeAudio({ base64: m.data.toString("base64"), format });
+      const t = await transcribeAudio({ data: m.data, mediaType: m.mime });
       if (t.ok && t.data.transcript) {
         text = t.data.transcript;
         transcribedBy = "ai";

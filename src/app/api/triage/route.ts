@@ -10,14 +10,14 @@ import { priceStats } from "@/server/services/workers";
 export const POST = route(async (req) => {
   const u = await requireUser(req);
   const { text, photoMediaId } = await parseBody(req, triageInput);
-  let imageDataUrl: string | null = null;
+  let image: { data: Buffer; mediaType: string } | null = null;
   if (photoMediaId) {
     const [m] = await db.select().from(media).where(eq(media.id, photoMediaId)).limit(1);
     if (!m || m.ownerUserId !== u.id || m.kind !== "image") throw new HttpError(404, "Photo not found");
-    imageDataUrl = `data:${m.mime};base64,${m.data.toString("base64")}`;
+    image = { data: m.data, mediaType: m.mime };
   }
-  if (!text && !imageDataUrl) throw new HttpError(400, "Describe the problem or add a photo");
-  const result = await triageProblem({ text, imageDataUrl });
+  if (!text && !image) throw new HttpError(400, "Describe the problem or add a photo");
+  const result = await triageProblem({ text, image });
   const stats = result.data.trade ? await priceStats(result.data.trade) : null;
   return json({ ...result, priceStats: stats });
 });
