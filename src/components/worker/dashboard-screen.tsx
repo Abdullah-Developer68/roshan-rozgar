@@ -14,45 +14,44 @@ import { AiBadge } from "@/components/ui/ai-badge";
 import { TRADES } from "@/lib/trades";
 import { AREA_BY_ID } from "@/lib/areas";
 import { P } from "@/lib/phrases";
+import { useT } from "@/lib/i18n";
 import type { JobDTO } from "@/lib/types";
 import { api } from "@/lib/client/api";
 import { toast } from "@/stores/toast-store";
 
-function minutesAgo(iso: string) {
-  const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-  return m < 1 ? "ابھی" : m < 60 ? `${m} منٹ پہلے` : `${Math.round(m / 60)} گھنٹے پہلے`;
+function useTimeAgo() {
+  const { t } = useT();
+  return (iso: string) => {
+    const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+    return m < 1 ? t("justNow") : m < 60 ? t("minAgo", { n: m }) : t("hoursAgo", { n: Math.round(m / 60) });
+  };
 }
 
 function AvailabilitySwitch() {
   const worker = useWorkerDashStore((s) => s.worker);
   const toggling = useWorkerDashStore((s) => s.toggling);
   const toggleOnline = useWorkerDashStore((s) => s.toggleOnline);
+  const { t } = useT();
   if (!worker) return null;
   const busy = worker.availability === "busy";
   const on = worker.isOnline;
   const phrase = busy ? P.busy : on ? P.online : P.offline;
   return (
-    <div
-      className={`flex items-center gap-3 rounded-3xl p-4 text-white shadow-lg ${busy ? "bg-busy" : on ? "bg-ok" : "bg-zinc-500"}`}
-    >
+    <div className={`flex items-center gap-3 rounded-3xl p-4 text-white shadow-lg ${busy ? "bg-busy" : on ? "bg-ok" : "bg-zinc-500"}`}>
       <button
         onClick={() => void toggleOnline()}
         disabled={toggling}
         aria-pressed={on}
-        aria-label={on ? "Go offline" : "Go online"}
+        aria-label={on ? t("goOffline") : t("goOnline")}
         className="flex size-20 shrink-0 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/40 active:scale-95"
       >
         {toggling ? <Spinner className="size-9" /> : <Power className="size-10" strokeWidth={2.5} />}
       </button>
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="urdu text-2xl font-bold" lang="ur">
-          {busy ? "آپ کام پر ہیں" : on ? "کام کے لیے تیار" : "آف لائن"}
-        </span>
-        <span className="mt-1 text-xs text-white/80" dir="ltr">
-          {busy ? "Engaged on a job — hidden from new customers" : on ? "Customers nearby can find you" : "Hidden from customers"}
-        </span>
+        <span className="text-2xl font-bold">{busy ? t("youAreOnJob") : on ? t("readyForWork") : t("offline")}</span>
+        <span className="mt-1 text-xs text-white/85">{busy ? t("subBusy") : on ? t("subOnline") : t("subOffline")}</span>
       </div>
-      <SpeakButton ur={phrase.ur} hi={phrase.hi} />
+      <SpeakButton ur={phrase.ur} hi={phrase.hi} en={phrase.en} />
     </div>
   );
 }
@@ -60,27 +59,29 @@ function AvailabilitySwitch() {
 function ActiveJob() {
   const job = useWorkerDashStore((s) => s.active);
   const refresh = useWorkerDashStore((s) => s.refresh);
+  const { t, pick } = useT();
   if (!job) return null;
   const area = AREA_BY_ID[job.areaId];
-  const say = `${job.customer.name} کا کام۔ ${job.summaryUr ?? ""} قیمت ${job.agreedPrice} روپے۔`;
+  const sayUr = `${job.customer.name} کا کام۔ ${job.summaryUr ?? ""} قیمت ${job.agreedPrice} روپے۔`;
+  const sayEn = `Job for ${job.customer.name}. ${job.summaryEn ?? job.problemText} Price ${job.agreedPrice} rupees.`;
   return (
     <section className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-2 ring-busy">
       <div className="flex items-center justify-between">
-        <span className="urdu text-lg font-bold text-busy" lang="ur">ابھی کا کام</span>
-        <SpeakButton ur={say} />
+        <span className="text-lg font-bold text-busy">{t("currentJob")}</span>
+        <SpeakButton ur={sayUr} en={sayEn} />
       </div>
-      <p className="urdu text-lg" lang="ur">{job.summaryUr || job.problemText}</p>
-      <div className="flex flex-wrap items-center gap-3 text-sm" dir="ltr">
+      <p className="text-lg">{pick(job.summaryEn, job.summaryUr) || job.problemText}</p>
+      <div className="flex flex-wrap items-center gap-3 text-sm">
         <span className="font-semibold">{job.customer.name}</span>
-        <span className="flex items-center gap-1"><MapPin className="size-4" /> {area?.en}</span>
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-bold text-emerald-800">Rs {job.agreedPrice?.toLocaleString("en-PK")}</span>
+        <span className="flex items-center gap-1"><MapPin className="size-4" /> <span dir="ltr">{area?.en}</span></span>
+        <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-bold text-emerald-800" dir="ltr">Rs {job.agreedPrice?.toLocaleString("en-PK")}</span>
       </div>
       {job.addressNote && <p className="text-sm text-muted" dir="auto">{job.addressNote}</p>}
       <div className="grid grid-cols-3 gap-2">
         {job.customer.phone && (
           <a href={`tel:${job.customer.phone}`} className="flex h-14 flex-col items-center justify-center rounded-2xl bg-brand/10 text-brand">
             <Phone className="size-6" />
-            <span className="urdu text-xs" lang="ur">فون</span>
+            <span className="text-xs">{t("call")}</span>
           </a>
         )}
         <a
@@ -90,11 +91,11 @@ function ActiveJob() {
           className="flex h-14 flex-col items-center justify-center rounded-2xl bg-brand/10 text-brand"
         >
           <Navigation className="size-6" />
-          <span className="urdu text-xs" lang="ur">راستہ</span>
+          <span className="text-xs">{t("route")}</span>
         </a>
         <Link href={`/worker/jobs/${job.id}`} className="flex h-14 flex-col items-center justify-center rounded-2xl bg-brand/10 text-brand">
           <MessageCircle className="size-6" />
-          <span className="urdu text-xs" lang="ur">بات</span>
+          <span className="text-xs">{t("chat")}</span>
         </Link>
       </div>
       <button
@@ -110,7 +111,7 @@ function ActiveJob() {
         className="flex h-16 items-center justify-center gap-2 rounded-2xl bg-ok text-white shadow active:scale-[0.98]"
       >
         <CheckCheck className="size-8" />
-        <span className="urdu text-xl font-bold" lang="ur">کام مکمل</span>
+        <span className="text-xl font-bold">{t("jobDone")}</span>
       </button>
     </section>
   );
@@ -120,32 +121,36 @@ function ActiveJob() {
 function RequestCard({ job }: { job: JobDTO }) {
   const decline = useWorkerDashStore((s) => s.decline);
   const router = useRouter();
-  const t = TRADES[job.trade];
+  const { t, pick } = useT();
+  const ago = useTimeAgo();
+  const tr = TRADES[job.trade];
   const area = AREA_BY_ID[job.areaId];
   const offer = job.pendingOffer;
-  const say = `نیا کام۔ ${job.summaryUr || job.problemText}۔ ${job.distanceKm ?? ""} کلومیٹر دور۔${offer ? ` گاہک ${offer.amount} روپے دے رہا ہے۔` : ""}`;
+  const summary = pick(job.summaryEn, job.summaryUr) || job.problemText;
+  const sayUr = `نیا کام۔ ${job.summaryUr || job.problemText}۔ ${job.distanceKm ?? ""} کلومیٹر دور۔${offer ? ` گاہک ${offer.amount} روپے دے رہا ہے۔` : ""}`;
+  const sayEn = `New job. ${job.summaryEn || job.problemText}. ${job.distanceKm ?? ""} kilometres away.${offer ? ` The customer offers ${offer.amount} rupees.` : ""}`;
   return (
     <li className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line">
       <div className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-bg text-3xl" aria-hidden>{t.emoji}</span>
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-bg text-3xl" aria-hidden>{tr.emoji}</span>
         <div className="min-w-0 flex-1">
-          <p className="urdu text-lg leading-9" lang="ur">{job.summaryUr || job.problemText}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted" dir="ltr">
-            <span className="flex items-center gap-1"><MapPin className="size-4" /> {area?.en} · {job.distanceKm} km</span>
+          <p className="text-lg">{summary}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+            <span className="flex items-center gap-1"><MapPin className="size-4" /> <span dir="ltr">{area?.en} · {job.distanceKm} km</span></span>
             <span>{job.customer.name}</span>
-            <span className="urdu" lang="ur">{minutesAgo(job.createdAt)}</span>
+            <span>{ago(job.createdAt)}</span>
             <AiBadge source={job.triageSource} />
           </div>
         </div>
-        <SpeakButton ur={say} />
+        <SpeakButton ur={sayUr} en={sayEn} />
       </div>
       {job.photoUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={job.photoUrl} alt="Problem photo" className="max-h-48 w-full rounded-2xl object-cover" />
+        <img src={job.photoUrl} alt="" className="max-h-48 w-full rounded-2xl object-cover" />
       )}
       {offer && (
         <div className="flex items-center justify-between rounded-2xl bg-sun-soft px-4 py-2 ring-1 ring-amber-200">
-          <span className="urdu text-base" lang="ur">{offer.by === "customer" ? "گاہک کی پیشکش" : "آپ کی قیمت"}</span>
+          <span className="text-base">{offer.by === "customer" ? t("customersOffer") : t("yourPrice")}</span>
           <span className="text-2xl font-black" dir="ltr">Rs {offer.amount.toLocaleString("en-PK")}</span>
         </div>
       )}
@@ -155,11 +160,11 @@ function RequestCard({ job }: { job: JobDTO }) {
           className="flex h-16 items-center justify-center gap-2 rounded-2xl bg-ok text-white active:scale-[0.98]"
         >
           <Check className="size-8" strokeWidth={3} />
-          <span className="urdu text-xl font-bold" lang="ur">دیکھیں / بات کریں</span>
+          <span className="text-xl font-bold">{t("viewTalk")}</span>
         </button>
         <button
           onClick={() => void decline(job.id)}
-          aria-label="Decline"
+          aria-label={t("decline")}
           className="flex size-16 items-center justify-center rounded-2xl bg-red-50 text-danger active:scale-95"
         >
           <X className="size-8" strokeWidth={3} />
@@ -172,20 +177,21 @@ function RequestCard({ job }: { job: JobDTO }) {
 function Requests() {
   const requests = useWorkerDashStore((s) => s.requests);
   const worker = useWorkerDashStore((s) => s.worker);
+  const { t } = useT();
   if (!worker) return null;
   if (!requests.length)
     return (
-      <div className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-line p-6 text-center" dir="rtl">
+      <div className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-line p-6 text-center">
         <span className="text-4xl" aria-hidden>{worker.isOnline ? "🔔" : "😴"}</span>
-        <p className="urdu text-lg" lang="ur">
-          {worker.availability === "busy" ? "کام ختم ہو تو نئے کام آئیں گے" : worker.isOnline ? "ابھی کوئی نیا کام نہیں۔ کام آئے گا تو گھنٹی بجے گی۔" : "کام لینے کے لیے اوپر والا بٹن دبائیں"}
+        <p className="text-lg">
+          {worker.availability === "busy" ? t("emptyBusy") : worker.isOnline ? t("emptyOnline") : t("emptyOffline")}
         </p>
       </div>
     );
   return (
-    <section className="flex flex-col gap-3" dir="rtl">
-      <h2 className="urdu flex items-center gap-2 text-xl font-bold" lang="ur">
-        نئے کام <span className="rounded-full bg-danger px-2 text-sm text-white" dir="ltr">{requests.length}</span>
+    <section className="flex flex-col gap-3">
+      <h2 className="flex items-center gap-2 text-xl font-bold">
+        {t("newJobs")} <span className="rounded-full bg-danger px-2 text-sm text-white" dir="ltr">{requests.length}</span>
       </h2>
       <ul className="flex flex-col gap-3">
         {requests.map((j) => (
@@ -200,21 +206,23 @@ function TrustPanel() {
   const worker = useWorkerDashStore((s) => s.worker);
   const signOut = useSessionStore((s) => s.signOut);
   const router = useRouter();
+  const { t, pick } = useT();
   if (!worker) return null;
+  const summary = pick(worker.trustSummaryEn, worker.trustSummaryUr);
   return (
-    <section className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line" dir="rtl">
+    <section className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line">
       <div className="flex items-center gap-3">
         <Avatar name={worker.name} photoUrl={worker.photoUrl} trade={worker.trade} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-bold">{worker.nameUr || worker.name}</p>
-          <div className="flex items-center gap-2 text-sm" dir="ltr">
+          <p className="truncate text-lg font-bold">{pick(worker.name, worker.nameUr)}</p>
+          <div className="flex items-center gap-2 text-sm">
             <Stars value={worker.ratingAvg} />
-            <span className="font-semibold">{worker.ratingAvg ? worker.ratingAvg.toFixed(1) : "New"}</span>
-            <span className="text-muted">· {worker.jobsCompleted} jobs</span>
+            <span className="font-semibold" dir="ltr">{worker.ratingAvg ? worker.ratingAvg.toFixed(1) : t("new")}</span>
+            <span className="text-muted">· {t("nJobs", { n: worker.jobsCompleted })}</span>
           </div>
         </div>
         <button
-          aria-label="Sign out"
+          aria-label={t("signOut")}
           onClick={async () => {
             await signOut();
             router.replace("/");
@@ -224,14 +232,14 @@ function TrustPanel() {
           <LogOut className="size-5" />
         </button>
       </div>
-      {worker.trustSummaryUr && (
+      {summary && (
         <div className="flex items-start gap-2 rounded-2xl bg-bg p-3">
-          <p className="urdu flex-1 text-base" lang="ur">{worker.trustSummaryUr}</p>
-          <SpeakButton ur={worker.trustSummaryUr} size="sm" />
+          <p className="flex-1 text-base">{summary}</p>
+          <SpeakButton ur={worker.trustSummaryUr} en={worker.trustSummaryEn} size="sm" />
         </div>
       )}
-      <div className="flex items-center justify-between text-xs text-muted" dir="ltr">
-        <span>What customers see about you</span>
+      <div className="flex items-center justify-between text-xs text-muted">
+        <span>{t("whatCustomersSee")}</span>
         <AiBadge source={worker.trustSummarySource} />
       </div>
     </section>

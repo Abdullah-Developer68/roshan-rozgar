@@ -109,13 +109,16 @@ export function speakUrdu(ur: string, hi?: string, onEnd?: () => void): boolean 
   return true;
 }
 
-export function speakEnglish(text: string): boolean {
+export function speakEnglish(text: string, onEnd?: () => void): boolean {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   const v = ttsVoiceFor("en");
   if (v) u.voice = v;
   u.lang = v?.lang ?? "en-US";
+  const token = ++speakingToken;
+  u.onend = () => token === speakingToken && onEnd?.();
+  u.onerror = () => token === speakingToken && onEnd?.();
   window.speechSynthesis.speak(u);
   return true;
 }

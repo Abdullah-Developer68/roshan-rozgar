@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
+import { LangSync } from "@/components/shared/lang-sync";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const nastaliq = Noto_Nastaliq_Urdu({
@@ -28,7 +30,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${geist.variable} ${nastaliq.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {children}
-        <Toaster />
+        <Suspense fallback={null}>
+          <Toaster />
+          <LangSync />
+        </Suspense>
       </body>
     </html>
   );

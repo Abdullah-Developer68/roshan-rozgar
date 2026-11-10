@@ -3,6 +3,7 @@ import { Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { speakEnglish, speakUrdu, stopSpeaking } from "@/lib/client/speech";
 import { toast } from "@/stores/toast-store";
+import { useT } from "@/lib/i18n";
 
 /** Reads text aloud: the core accessibility affordance for workers who don't read comfortably. */
 export function SpeakButton({
@@ -21,13 +22,16 @@ export function SpeakButton({
   label?: string;
 }) {
   const [on, setOn] = useState(false);
+  const { isUr, t } = useT();
+  // Speak the language the user chose; fall back to whichever text exists.
+  const speakUr = !!ur && (isUr || !en);
   const dim = size === "lg" ? "size-14" : size === "sm" ? "size-8" : "size-11";
   const icon = size === "lg" ? "size-7" : size === "sm" ? "size-4" : "size-5";
   if (!ur && !en) return null;
   return (
     <button
       type="button"
-      aria-label={label ?? "Listen"}
+      aria-label={label ?? t("listen")}
       onClick={(e) => {
         e.stopPropagation();
         if (on) {
@@ -35,12 +39,9 @@ export function SpeakButton({
           setOn(false);
           return;
         }
-        const ok = ur ? speakUrdu(ur, hi, () => setOn(false)) : speakEnglish(en!);
-        if (!ok) toast.info("This device has no Urdu voice installed", "اس فون میں اردو آواز موجود نہیں");
-        else {
-          setOn(true);
-          if (!ur) setTimeout(() => setOn(false), 4000);
-        }
+        const ok = speakUr ? speakUrdu(ur!, hi, () => setOn(false)) : speakEnglish(en!, () => setOn(false));
+        if (!ok) toast.info("This device has no voice for this language", "اس فون میں اردو آواز موجود نہیں");
+        else setOn(true);
       }}
       className={`inline-flex ${dim} shrink-0 items-center justify-center rounded-full ${on ? "bg-sun text-white" : "bg-sun-soft text-amber-700"} ring-1 ring-amber-200 transition active:scale-95 ${className}`}
     >
@@ -50,13 +51,15 @@ export function SpeakButton({
 }
 
 /** Speak a prompt once when a worker screen appears (after the user's first tap, browsers allow it). */
-export function useAutoSpeak(ur: string, hi?: string, enabled = true) {
+export function useAutoSpeak(phrase: { ur: string; hi?: string; en: string }, enabled = true) {
+  const { isUr } = useT();
+  const { ur, hi, en } = phrase;
   useEffect(() => {
     if (!enabled) return;
-    const t = setTimeout(() => speakUrdu(ur, hi), 400);
+    const timer = setTimeout(() => (isUr ? speakUrdu(ur, hi) : speakEnglish(en)), 400);
     return () => {
-      clearTimeout(t);
+      clearTimeout(timer);
       stopSpeaking();
     };
-  }, [ur, hi, enabled]);
+  }, [ur, hi, en, enabled, isUr]);
 }

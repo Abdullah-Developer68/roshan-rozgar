@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { Circle, MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import { useRequestStore } from "@/stores/request-store";
 import { TRADES } from "@/lib/trades";
+import { useT, type MsgKey } from "@/lib/i18n";
 
 function pin(emoji: string, color: string, ring: boolean) {
   return L.divIcon({
@@ -42,9 +43,11 @@ export function WorkerMap() {
   const selected = useRequestStore((s) => s.selected);
   const toggle = useRequestStore((s) => s.toggleSelected);
   const setFocused = useRequestStore((s) => s.setFocused);
+  const { t, pick } = useT();
+  const avail: Record<string, MsgKey> = { available: "statusAvailable", busy: "statusBusy", offline: "statusOffline" };
 
   return (
-    <div className="h-64 overflow-hidden rounded-2xl ring-1 ring-line lg:h-[28rem]">
+    <div className="h-64 overflow-hidden rounded-2xl ring-1 ring-line lg:h-[28rem]" dir="ltr">
       <MapContainer center={[lat, lng]} zoom={13} scrollWheelZoom={false} className="size-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -53,7 +56,7 @@ export function WorkerMap() {
         <Recenter />
         <Circle center={[lat, lng]} radius={radiusKm * 1000} pathOptions={{ color: "#0b5d3b", weight: 1, fillOpacity: 0.04 }} />
         <Marker position={[lat, lng]} icon={homeIcon}>
-          <Tooltip>You</Tooltip>
+          <Tooltip>{pick("You", "آپ")}</Tooltip>
         </Marker>
         {results?.map((w) => {
           const color = w.availability === "available" ? "#dcfce7" : w.availability === "busy" ? "#ffedd5" : "#e5e7eb";
@@ -69,7 +72,7 @@ export function WorkerMap() {
               }}
             >
               <Tooltip>
-                {w.name} · ★{w.ratingAvg.toFixed(1)} · {w.distanceKm} km · {w.availability}
+                {pick(w.name, w.nameUr)} · ★{w.ratingAvg.toFixed(1)} · {w.distanceKm} km · {t(avail[w.availability])}
               </Tooltip>
             </Marker>
           );

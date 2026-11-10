@@ -6,6 +6,7 @@ import { SpeakButton, useAutoSpeak } from "@/components/ui/speak-button";
 import { Spinner } from "@/components/ui/spinner";
 import { SimulatedSms } from "@/components/auth/simulated-sms";
 import { P } from "@/lib/phrases";
+import { useT } from "@/lib/i18n";
 
 /** Numeric keypad sign-in for workers: digits only, no reading required. */
 export function WorkerPhoneLogin() {
@@ -19,20 +20,20 @@ export function WorkerPhoneLogin() {
   const sendCode = useLoginStore((s) => s.sendCode);
   const verify = useLoginStore((s) => s.verify);
   const reset = useLoginStore((s) => s.reset);
+  const { t } = useT();
 
   useEffect(() => reset, [reset]);
-  useAutoSpeak(step === "phone" ? P.welcome.ur : P.code.ur, step === "phone" ? P.welcome.hi : P.code.hi);
+  const phrase = step === "phone" ? P.welcome : P.code;
+  useAutoSpeak(phrase);
 
   const formatted = digits.replace(/^(\d{4})(\d{0,7}).*/, (_, a, b) => (b ? `${a} ${b}` : a));
   const ready = /^03\d{9}$/.test(digits);
 
   return (
     <div className="flex flex-1 flex-col gap-5">
-      <div className="flex items-start justify-between gap-3" dir="rtl">
-        <h1 className="urdu text-2xl font-bold" lang="ur">
-          {step === "phone" ? "اپنا موبائل نمبر" : "کوڈ آ گیا"}
-        </h1>
-        <SpeakButton ur={step === "phone" ? P.welcome.ur : P.code.ur} hi={step === "phone" ? P.welcome.hi : P.code.hi} size="lg" />
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="text-2xl font-bold">{step === "phone" ? t("phoneTitle") : t("codeTitle")}</h1>
+        <SpeakButton ur={phrase.ur} hi={phrase.hi} en={phrase.en} size="lg" />
       </div>
 
       {step === "phone" ? (
@@ -78,10 +79,10 @@ export function WorkerPhoneLogin() {
             className="flex h-20 items-center justify-center gap-3 rounded-3xl bg-ok text-white shadow-lg active:scale-[0.98] disabled:opacity-50"
           >
             {busy ? <Spinner className="size-8" /> : <Check className="size-10" strokeWidth={3} />}
-            <span className="urdu text-2xl font-bold" lang="ur">ٹھیک ہے</span>
+            <span className="text-2xl font-bold">{t("ok")}</span>
           </button>
           <button onClick={reset} className="flex items-center justify-center gap-2 text-sm text-muted">
-            <MessageSquareText className="size-4" /> <span className="urdu" lang="ur">نمبر بدلیں</span>
+            <MessageSquareText className="size-4" /> {t("changeNumber")}
           </button>
         </>
       )}

@@ -9,6 +9,8 @@ import { AudioNote } from "@/components/ui/audio-note";
 import { AiBadge } from "@/components/ui/ai-badge";
 import { AREA_BY_ID } from "@/lib/areas";
 import type { WorkerSearchResult } from "@/lib/types";
+import { useT } from "@/lib/i18n";
+import { REVIEW_TAGS } from "@/lib/validation";
 
 /** One search result (list item). */
 export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
@@ -18,14 +20,19 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
   const setFocused = useRequestStore((s) => s.setFocused);
   const best = useRequestStore((s) => s.results?.find((r) => r.availability === "available")?.id === w.id);
   const available = w.availability === "available";
+  const { t, pick } = useT();
+  const tagLabel = (tag: string) => {
+    const known = REVIEW_TAGS.find((x) => x.id === tag);
+    return known ? pick(known.id, known.ur) : tag;
+  };
 
   if (!available)
     return (
       <li className="flex items-center gap-3 rounded-2xl bg-white/60 p-3 opacity-70 ring-1 ring-line">
         <Avatar name={w.name} photoUrl={w.photoUrl} size="size-10" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{w.name}</p>
-          <p className="text-xs text-muted">{w.distanceKm} km · ★ {w.ratingAvg.toFixed(1)}</p>
+          <p className="truncate text-sm font-semibold">{pick(w.name, w.nameUr)}</p>
+          <p className="text-xs text-muted" dir="ltr">{w.distanceKm} km · ★ {w.ratingAvg.toFixed(1)}</p>
         </div>
         <StatusPill value={w.availability} />
       </li>
@@ -40,38 +47,38 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
         <Avatar name={w.name} photoUrl={w.photoUrl} trade={w.trade} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate font-bold">{w.name}</p>
-            {best && <span className="rounded-full bg-sun px-2 py-0.5 text-[11px] font-bold text-amber-950">Best match</span>}
+            <p className="truncate font-bold">{pick(w.name, w.nameUr)}</p>
+            {best && <span className="rounded-full bg-sun px-2 py-0.5 text-[11px] font-bold text-amber-950">{t("bestMatch")}</span>}
           </div>
           <div className="flex items-center gap-1.5 text-sm">
             <Stars value={w.ratingAvg} />
-            <span className="font-semibold">{w.ratingCount ? w.ratingAvg.toFixed(1) : "New"}</span>
+            <span className="font-semibold">{w.ratingCount ? w.ratingAvg.toFixed(1) : t("new")}</span>
             <span className="text-muted">({w.ratingCount})</span>
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
-            <span className="flex items-center gap-1"><MapPin className="size-3.5" />{w.distanceKm} km · {AREA_BY_ID[w.areaId]?.en}</span>
-            <span className="flex items-center gap-1"><Clock className="size-3.5" />~{w.etaMin} min</span>
-            <span className="flex items-center gap-1"><BadgeCheck className="size-3.5 text-ok" />{w.jobsCompleted} jobs done here</span>
-            <span>{w.experienceYears} yrs exp.</span>
+            <span className="flex items-center gap-1"><MapPin className="size-3.5" /><span dir="ltr">{w.distanceKm} km · {AREA_BY_ID[w.areaId]?.en}</span></span>
+            <span className="flex items-center gap-1"><Clock className="size-3.5" />{t("minAway", { n: w.etaMin })}</span>
+            <span className="flex items-center gap-1"><BadgeCheck className="size-3.5 text-ok" />{t("jobsDoneHere", { n: w.jobsCompleted })}</span>
+            <span>{t("yrsExp", { n: w.experienceYears })}</span>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-muted">Visit</p>
-          <p className="font-bold">Rs {w.visitCharge.toLocaleString("en-PK")}</p>
+        <div className="text-end">
+          <p className="text-xs text-muted">{t("visit")}</p>
+          <p className="font-bold" dir="ltr">Rs {w.visitCharge.toLocaleString("en-PK")}</p>
         </div>
       </div>
-      {w.trustSummaryEn && (
+      {pick(w.trustSummaryEn, w.trustSummaryUr) && (
         <div className="rounded-2xl bg-bg p-3 text-sm">
           <div className="mb-1 flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">What verified customers say</span>
+            <span className="text-xs font-semibold text-muted">{t("whatCustomersSay")}</span>
             <AiBadge source={w.trustSummarySource} />
           </div>
-          <p>{w.trustSummaryEn}</p>
+          <p>{pick(w.trustSummaryEn, w.trustSummaryUr)}</p>
           {w.trustTags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
-              {w.trustTags.map((t) => (
-                <span key={t} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${t === "Late" || t === "Overcharged" ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"}`}>
-                  {t}
+              {w.trustTags.map((tag) => (
+                <span key={tag} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${tag === "Late" || tag === "Overcharged" ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"}`}>
+                  {tagLabel(tag)}
                 </span>
               ))}
             </div>
@@ -79,16 +86,16 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        {w.voiceIntroUrl && <AudioNote src={w.voiceIntroUrl} label="Hear them" />}
+        {w.voiceIntroUrl && <AudioNote src={w.voiceIntroUrl} label={t("hearThem")} />}
         <Link href={`/customer/workers/${w.id}`} className="text-sm font-semibold text-brand underline">
-          Profile & reviews
+          {t("profileReviews")}
         </Link>
         <button
           onClick={() => toggle(w.id)}
           aria-pressed={selected}
-          className={`ml-auto h-10 rounded-xl px-4 text-sm font-bold ${selected ? "bg-brand text-white" : "bg-brand/10 text-brand"}`}
+          className={`ms-auto h-10 rounded-xl px-4 text-sm font-bold ${selected ? "bg-brand text-white" : "bg-brand/10 text-brand"}`}
         >
-          {selected ? "✓ Selected" : "Select"}
+          {selected ? t("selected") : t("select")}
         </button>
       </div>
     </li>

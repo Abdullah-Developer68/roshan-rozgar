@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useLoginStore } from "@/stores/login-store";
 import { Spinner } from "@/components/ui/spinner";
 import { SimulatedSms } from "@/components/auth/simulated-sms";
+import { useT } from "@/lib/i18n";
 
 export function CustomerLogin() {
   const digits = useLoginStore((s) => s.digits);
@@ -17,14 +18,15 @@ export function CustomerLogin() {
   const verify = useLoginStore((s) => s.verify);
   const reset = useLoginStore((s) => s.reset);
   const demoSignIn = useLoginStore((s) => s.demoSignIn);
+  const { t } = useT();
 
   useEffect(() => reset, [reset]);
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 py-6">
       <div>
-        <h1 className="text-2xl font-bold">Sign in to find a worker</h1>
-        <p className="text-sm text-muted">We use your mobile number. No password.</p>
+        <h1 className="text-2xl font-bold">{t("clTitle")}</h1>
+        <p className="text-sm text-muted">{t("clSub")}</p>
       </div>
       {step === "phone" ? (
         <form
@@ -43,11 +45,12 @@ export function CustomerLogin() {
               value={digits}
               onChange={(e) => setDigits(e.target.value)}
               className="w-full bg-transparent text-lg outline-none"
-              aria-label="Mobile number"
+              dir="ltr"
+              aria-label={t("mobileNumber")}
             />
           </label>
           <button disabled={busy} className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand font-semibold text-white disabled:opacity-60">
-            {busy ? <Spinner /> : <>Send code <ArrowRight className="size-4" /></>}
+            {busy ? <Spinner /> : <>{t("sendCode")} <ArrowRight className="size-4 rtl:rotate-180" /></>}
           </button>
         </form>
       ) : (
@@ -65,25 +68,26 @@ export function CustomerLogin() {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             className="rounded-2xl bg-white px-4 py-3 text-center text-2xl font-bold tracking-[0.4em] ring-1 ring-line outline-none focus:ring-2 focus:ring-brand"
+            dir="ltr"
             aria-label="6-digit code"
           />
           <button disabled={busy || code.length !== 6} className="flex h-12 items-center justify-center rounded-2xl bg-brand font-semibold text-white disabled:opacity-60">
-            {busy ? <Spinner /> : "Verify"}
+            {busy ? <Spinner /> : t("verify")}
           </button>
           <button type="button" onClick={reset} className="text-sm text-muted underline">
-            Use a different number
+            {t("otherNumber")}
           </button>
         </form>
       )}
       {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
       <div className="mt-2 rounded-2xl border border-dashed border-line p-3 text-sm">
-        <p className="mb-2 font-semibold">Judges / demo</p>
+        <p className="mb-2 font-semibold">{t("judgesDemo")}</p>
         <button
           onClick={() => void demoSignIn("+923001111111")}
           disabled={busy}
-          className="w-full rounded-xl bg-sun-soft px-3 py-2 text-left font-medium text-amber-900 ring-1 ring-amber-200"
+          className="w-full rounded-xl bg-sun-soft px-3 py-2 text-start font-medium text-amber-900 ring-1 ring-amber-200"
         >
-          Continue as demo customer · Ayesha (0300 1111111)
+          {t("demoCustomerBtn")}
         </button>
       </div>
     </div>

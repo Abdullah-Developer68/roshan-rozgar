@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useLoginStore } from "@/stores/login-store";
 import { useSessionStore } from "@/stores/session-store";
 import { Spinner } from "@/components/ui/spinner";
+import { useT, type MsgKey } from "@/lib/i18n";
 
-const ACCOUNTS = [
-  { phone: "+923001111111", label: "Ayesha · customer in G-9", to: "/customer" },
-  { phone: "+923002222222", label: "Muhammad Aslam · electrician in G-9", to: "/worker" },
+const ACCOUNTS: { phone: string; label: MsgKey; to: string }[] = [
+  { phone: "+923001111111", label: "demoAyesha", to: "/customer" },
+  { phone: "+923002222222", label: "demoAslam", to: "/worker" },
 ];
 
 /** One-tap demo sign-in: runs the real OTP flow against the simulated SMS inbox. */
@@ -16,6 +17,7 @@ export function DemoPanel() {
   const signOut = useSessionStore((s) => s.signOut);
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const { t } = useT();
   return (
     <div className="flex flex-col gap-2">
       {ACCOUNTS.map((a) => (
@@ -29,10 +31,10 @@ export function DemoPanel() {
             setBusy(null);
             if (ok) router.push(a.to);
           }}
-          className="flex items-center justify-between gap-2 rounded-2xl bg-white px-4 py-3 text-left text-sm font-medium ring-1 ring-line hover:ring-brand"
+          className="flex items-center justify-between gap-2 rounded-2xl bg-white px-4 py-3 text-start text-sm font-medium ring-1 ring-line hover:ring-brand"
         >
-          <span>{a.label}</span>
-          <span className="flex items-center gap-2 text-xs text-muted">
+          <span>{t(a.label)}</span>
+          <span className="flex items-center gap-2 text-xs text-muted" dir="ltr">
             {busy === a.phone ? <Spinner className="size-4" /> : `0${a.phone.slice(3, 6)} ${a.phone.slice(6)}`}
           </span>
         </button>

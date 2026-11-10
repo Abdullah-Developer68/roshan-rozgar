@@ -5,6 +5,7 @@ import { useJobStore } from "@/stores/job-store";
 import { MicButton } from "@/components/ui/mic-button";
 import { Spinner } from "@/components/ui/spinner";
 import { REVIEW_TAGS } from "@/lib/validation";
+import { useT } from "@/lib/i18n";
 
 /** Post-job review: structured signals (stars, tags, price honesty) + an optional spoken/typed comment. */
 export function ReviewForm() {
@@ -16,6 +17,7 @@ export function ReviewForm() {
   const [paid, setPaid] = useState<boolean | null>(null);
   const [again, setAgain] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
+  const { t, pick } = useT();
   if (!job) return null;
 
   const yesNo = (value: boolean | null, set: (v: boolean) => void) => (
@@ -27,7 +29,7 @@ export function ReviewForm() {
           onClick={() => set(v)}
           className={`rounded-full px-4 py-1.5 text-sm font-semibold ${value === v ? (v ? "bg-ok text-white" : "bg-danger text-white") : "bg-white ring-1 ring-line"}`}
         >
-          {v ? "Yes" : "No"}
+          {v ? t("yes") : t("no")}
         </button>
       ))}
     </div>
@@ -42,7 +44,7 @@ export function ReviewForm() {
         void review({ rating, tags, paidAgreedPrice: paid, wouldHireAgain: again, comment: comment.trim() || null });
       }}
     >
-      <h3 className="font-bold">How was {job.worker.name}?</h3>
+      <h3 className="font-bold">{t("howWas", { name: job.worker.name })}</h3>
       <div className="flex justify-center gap-1">
         {[1, 2, 3, 4, 5].map((i) => (
           <button key={i} type="button" aria-label={`${i} stars`} onClick={() => setRating(i)}>
@@ -51,26 +53,26 @@ export function ReviewForm() {
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        {REVIEW_TAGS.map((t) => {
-          const on = tags.includes(t.id);
+        {REVIEW_TAGS.map((tag) => {
+          const on = tags.includes(tag.id);
           return (
             <button
-              key={t.id}
+              key={tag.id}
               type="button"
-              onClick={() => setTags(on ? tags.filter((x) => x !== t.id) : [...tags, t.id])}
+              onClick={() => setTags(on ? tags.filter((x) => x !== tag.id) : [...tags, tag.id])}
               className={`rounded-full px-3 py-1.5 text-sm ${on ? "bg-brand text-white" : "bg-bg ring-1 ring-line"}`}
             >
-              {t.emoji} {t.id}
+              {tag.emoji} {pick(tag.id, tag.ur)}
             </button>
           );
         })}
       </div>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span>Did you pay the agreed Rs {job.agreedPrice?.toLocaleString("en-PK")}?</span>
+        <span>{t("paidAgreed", { a: job.agreedPrice?.toLocaleString("en-PK") ?? "" })}</span>
         {yesNo(paid, setPaid)}
       </div>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span>Would you hire again?</span>
+        <span>{t("hireAgain")}</span>
         {yesNo(again, setAgain)}
       </div>
       <div className="flex items-center gap-2">
@@ -80,14 +82,14 @@ export function ReviewForm() {
           onChange={(e) => setComment(e.target.value)}
           rows={2}
           dir="auto"
-          placeholder="Say or type a few words for the next customer"
+          placeholder={t("reviewPh")}
           className="min-w-0 flex-1 rounded-2xl bg-bg p-3 outline-none ring-1 ring-line"
         />
       </div>
       <button disabled={!rating || acting} className="flex h-12 items-center justify-center rounded-2xl bg-brand font-bold text-white disabled:opacity-50">
-        {acting ? <Spinner /> : "Submit review"}
+        {acting ? <Spinner /> : t("submitReview")}
       </button>
-      <p className="text-center text-xs text-muted">Only customers with a completed booking can review — every review is tied to a real job.</p>
+      <p className="text-center text-xs text-muted">{t("reviewNote")}</p>
     </form>
   );
 }

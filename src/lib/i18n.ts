@@ -1,0 +1,337 @@
+"use client";
+import { usePathname } from "next/navigation";
+import { useCallback, useMemo } from "react";
+import { useLangStore, type Lang } from "@/stores/lang-store";
+
+/** UI strings. Data that already comes in both languages (AI summaries, trades, areas) uses `pick`. */
+const M = {
+  // common
+  brand: { en: "Roshan Rozgar", ur: "روشن روزگار" },
+  roleWorker: { en: "Worker", ur: "کاریگر" },
+  language: { en: "Language", ur: "زبان" },
+  signOut: { en: "Sign out", ur: "سائن آؤٹ" },
+  back: { en: "Back", ur: "واپس" },
+  listen: { en: "Listen", ur: "سنیں" },
+  home: { en: "Home", ur: "ہوم" },
+  yes: { en: "Yes", ur: "ہاں" },
+  no: { en: "No", ur: "نہیں" },
+  new: { en: "New", ur: "نیا" },
+  continue: { en: "Continue", ur: "جاری رکھیں" },
+  noVoice: { en: "This device has no voice for this language", ur: "اس فون میں اردو آواز موجود نہیں" },
+  aiFallback: { en: "Basic (AI offline)", ur: "سادہ (AI بند)" },
+  aiFallbackTitle: { en: "AI unavailable — rule-based fallback", ur: "AI دستیاب نہیں — سادہ طریقہ" },
+  aiSeed: { en: "Seeded", ur: "نمونہ" },
+  aiSeedTitle: { en: "Generated from seeded demo reviews", ur: "نمونے کے ریویو سے بنایا گیا" },
+  statusAvailable: { en: "Available now", ur: "ابھی فارغ" },
+  statusBusy: { en: "On a job", ur: "کام پر" },
+  statusOffline: { en: "Offline", ur: "آف لائن" },
+  rs: { en: "Rs", ur: "روپے" },
+  years: { en: "years", ur: "سال" },
+  km: { en: "km", ur: "کلومیٹر" },
+
+  // landing
+  landWorkerTitle: { en: "I'm a worker", ur: "میں کاریگر ہوں" },
+  landWorkerSub: { en: "Make your profile by speaking · get work", ur: "بول کر پروفائل بنائیں · کام پائیں" },
+  landCustomerTitle: { en: "I need a worker", ur: "مجھے کاریگر چاہیے" },
+  landCustomerSub: {
+    en: "Electrician, plumber, AC technician and more — near you, free right now.",
+    ur: "الیکٹریشن، پلمبر، اے سی مکینک اور دوسرے کاریگر — آپ کے قریب، ابھی فارغ۔",
+  },
+  step1T: { en: "Join by speaking", ur: "بول کر شامل ہوں" },
+  step1: {
+    en: "Workers say their name, trade, experience, area and fee in Urdu. AI fills the profile — no form, no typing.",
+    ur: "کاریگر اپنا نام، کام، تجربہ، علاقہ اور فیس بولتے ہیں۔ AI پروفائل بھر دیتا ہے — نہ فارم، نہ لکھائی۔",
+  },
+  step2T: { en: "Nearby & free now", ur: "قریب اور ابھی فارغ" },
+  step2: {
+    en: "Customers see only workers who are online and not already on a job, ranked by distance and verified reviews.",
+    ur: "گاہک صرف وہ کاریگر دیکھتے ہیں جو آن لائن ہیں اور کسی کام پر نہیں، فاصلے اور تصدیق شدہ ریویو کے حساب سے۔",
+  },
+  step3T: { en: "Talk in your language", ur: "اپنی زبان میں بات" },
+  step3: {
+    en: "Voice notes are transcribed and translated both ways. A spoken price becomes a one-tap price card.",
+    ur: "آواز کے پیغام لکھے اور ترجمہ کیے جاتے ہیں۔ بولی ہوئی قیمت ایک ٹیپ والا قیمت کارڈ بن جاتی ہے۔",
+  },
+  step4T: { en: "Booked = engaged", ur: "بکنگ = مصروف" },
+  step4: {
+    en: "Accepting a price books the worker atomically; their other requests close and they vanish from search until done.",
+    ur: "قیمت منظور ہوتے ہی کاریگر بک ہو جاتا ہے؛ باقی درخواستیں بند اور کام ختم ہونے تک وہ تلاش میں نظر نہیں آتا۔",
+  },
+  step5T: { en: "Trust that compounds", ur: "بڑھتا ہوا بھروسہ" },
+  step5: {
+    en: "Only real, completed jobs can be reviewed. Price honesty and AI review summaries help the next household decide.",
+    ur: "صرف مکمل ہونے والے اصل کام کا ریویو ہو سکتا ہے۔ قیمت کی ایمانداری اور AI خلاصہ اگلے گاہک کی مدد کرتے ہیں۔",
+  },
+  demoTitle: { en: "Demo accounts", ur: "ڈیمو اکاؤنٹس" },
+  demoText: {
+    en: "One tap signs in through the real phone-OTP flow. Open the worker in a second browser (or incognito) to watch both sides live.",
+    ur: "ایک ٹیپ سے اصل فون کوڈ کے ذریعے لاگ ان ہوں۔ دونوں طرف دیکھنے کے لیے کاریگر کو دوسرے براؤزر میں کھولیں۔",
+  },
+  demoAyesha: { en: "Ayesha · customer in G-9", ur: "عائشہ · گاہک، جی نائن" },
+  demoAslam: { en: "Muhammad Aslam · electrician in G-9", ur: "محمد اسلم · الیکٹریشن، جی نائن" },
+  realTitle: { en: "What's real and what's simulated", ur: "کیا اصل ہے اور کیا فرضی" },
+  realL: { en: "Real:", ur: "اصل:" },
+  real: {
+    en: "accounts, sessions, profiles, search, chat, price agreement, booking locks, reviews, AI calls (OpenRouter free models), speech recognition (browser).",
+    ur: "اکاؤنٹ، پروفائل، تلاش، بات چیت، قیمت طے کرنا، بکنگ، ریویو، AI (OpenRouter کے مفت ماڈل)، آواز کی پہچان (براؤزر)۔",
+  },
+  simL: { en: "Simulated:", ur: "فرضی:" },
+  sim: {
+    en: 'SMS delivery — OTP codes appear in an on-screen "SMS" banner. 34 workers, their past jobs and reviews are seeded demo data (labelled).',
+    ur: "SMS — کوڈ اسکرین پر SMS بینر میں نظر آتا ہے۔ 34 کاریگر، ان کے پرانے کام اور ریویو نمونے کا ڈیٹا ہیں (نشان زدہ)۔",
+  },
+  oosL: { en: "Out of scope:", ur: "شامل نہیں:" },
+  oos: { en: "payments and CNIC verification.", ur: "ادائیگی اور شناختی کارڈ کی تصدیق۔" },
+  quota: {
+    en: "When the free AI quota runs out, features fall back to rule-based parsing and are labelled Basic (AI offline).",
+    ur: "مفت AI کی حد ختم ہونے پر سادہ طریقہ استعمال ہوتا ہے اور اس پر «سادہ (AI بند)» لکھا ہوتا ہے۔",
+  },
+
+  // login
+  phoneTitle: { en: "Your mobile number", ur: "اپنا موبائل نمبر" },
+  codeTitle: { en: "Code received", ur: "کوڈ آ گیا" },
+  ok: { en: "OK", ur: "ٹھیک ہے" },
+  changeNumber: { en: "Change number", ur: "نمبر بدلیں" },
+  smsHeader: { en: "Messages · simulated SMS", ur: "پیغامات · فرضی SMS" },
+  now: { en: "now", ur: "ابھی" },
+  smsWaiting: { en: "Waiting for SMS…", ur: "SMS کا انتظار…" },
+  smsNone: { en: "No SMS yet", ur: "ابھی کوئی SMS نہیں" },
+  clTitle: { en: "Sign in to find a worker", ur: "کاریگر ڈھونڈنے کے لیے لاگ ان کریں" },
+  clSub: { en: "We use your mobile number. No password.", ur: "ہم آپ کا موبائل نمبر استعمال کرتے ہیں۔ کوئی پاس ورڈ نہیں۔" },
+  mobileNumber: { en: "Mobile number", ur: "موبائل نمبر" },
+  sendCode: { en: "Send code", ur: "کوڈ بھیجیں" },
+  verify: { en: "Verify", ur: "تصدیق کریں" },
+  otherNumber: { en: "Use a different number", ur: "دوسرا نمبر استعمال کریں" },
+  judgesDemo: { en: "Judges / demo", ur: "ججز / ڈیمو" },
+  demoCustomerBtn: {
+    en: "Continue as demo customer · Ayesha (0300 1111111)",
+    ur: "ڈیمو گاہک کے طور پر جاری رکھیں · عائشہ (0300 1111111)",
+  },
+  nameTitle: { en: "What should workers call you?", ur: "کاریگر آپ کو کس نام سے پکاریں؟" },
+  namePh: { en: "e.g. Ayesha", ur: "مثلاً عائشہ" },
+
+  // customer shell / home
+  myJobs: { en: "My jobs", ur: "میرے کام" },
+  signedInAsWorker: { en: "You're signed in as a worker ({name}).", ur: "آپ کاریگر کے طور پر لاگ ان ہیں ({name})۔" },
+  signOutToCustomer: { en: "Sign out to continue as a customer", ur: "گاہک کے طور پر جاری رکھنے کے لیے سائن آؤٹ کریں" },
+  chTitle: { en: "What needs fixing?", ur: "کیا ٹھیک کروانا ہے؟" },
+  chSub: {
+    en: "Speak, type (English / Urdu / Roman Urdu) or snap a photo. AI works out who you need.",
+    ur: "بولیں، لکھیں (انگریزی / اردو / رومن اردو) یا تصویر کھینچیں۔ AI بتائے گا کہ آپ کو کون سا کاریگر چاہیے۔",
+  },
+  chPlaceholder: {
+    en: "e.g. AC thanda nahi kar raha aur pani tapak raha hai",
+    ur: "مثلاً اے سی ٹھنڈا نہیں کر رہا اور پانی ٹپک رہا ہے",
+  },
+  addPhoto: { en: "Add photo", ur: "تصویر لگائیں" },
+  changePhoto: { en: "Change photo", ur: "تصویر بدلیں" },
+  removePhoto: { en: "Remove photo", ur: "تصویر ہٹائیں" },
+  findWorkers: { en: "Find workers", ur: "کاریگر ڈھونڈیں" },
+  usingGps: { en: "Using GPS", ur: "GPS سے" },
+  useMyLocation: { en: "Use my location", ur: "میری لوکیشن" },
+  area: { en: "Area", ur: "علاقہ" },
+  addressPh: { en: "House / street (shared only after booking)", ur: "گھر / گلی (صرف بکنگ کے بعد دکھایا جائے گا)" },
+  youNeed: { en: "You need: {trade}", ur: "آپ کو چاہیے: {trade}" },
+  whichWorker: { en: "Which worker do you need?", ur: "آپ کو کون سا کاریگر چاہیے؟" },
+  workerHears: { en: "What the worker will hear", ur: "کاریگر یہ سنے گا" },
+  urgent: { en: "Urgent.", ur: "فوری۔" },
+  aiEstimate: { en: "AI estimate for this job", ur: "اس کام کا AI اندازہ" },
+  paidOnPlatform: { en: "Paid on Roshan Rozgar ({n} jobs)", ur: "روشن روزگار پر ادا کیا گیا ({n} کام)" },
+  median: { en: "median", ur: "درمیانی" },
+  withinKm: { en: "Within {km} km of {area}", ur: "{area} سے {km} کلومیٹر کے اندر" },
+  availableNow: { en: "{n} available now", ur: "{n} ابھی فارغ" },
+  noneFree: { en: "No one is free nearby right now. Try a wider radius.", ur: "ابھی قریب کوئی فارغ نہیں۔ دائرہ بڑھائیں۔" },
+  busyOffline: {
+    en: "Busy or offline ({n}) — shown for transparency, can't be booked now",
+    ur: "مصروف یا آف لائن ({n}) — صرف معلومات کے لیے، ابھی بک نہیں ہو سکتے",
+  },
+  openingOffer: { en: "Your opening offer (worker can counter)", ur: "آپ کی پہلی پیشکش (کاریگر جواب میں قیمت دے سکتا ہے)" },
+  sendRequest: { en: "Send request to {n} worker(s)", ur: "{n} کاریگر کو درخواست بھیجیں" },
+
+  // worker card / profile
+  bestMatch: { en: "Best match", ur: "بہترین" },
+  minAway: { en: "~{n} min", ur: "~{n} منٹ" },
+  jobsDoneHere: { en: "{n} jobs done here", ur: "یہاں {n} کام مکمل" },
+  yrsExp: { en: "{n} yrs exp.", ur: "{n} سال تجربہ" },
+  visit: { en: "Visit", ur: "آنے کی فیس" },
+  whatCustomersSay: { en: "What verified customers say", ur: "تصدیق شدہ گاہک کیا کہتے ہیں" },
+  hearThem: { en: "Hear them", ur: "آواز سنیں" },
+  profileReviews: { en: "Profile & reviews", ur: "پروفائل اور ریویو" },
+  select: { en: "Select", ur: "منتخب کریں" },
+  selected: { en: "✓ Selected", ur: "✓ منتخب" },
+  verifiedReviews: { en: "({n} verified reviews)", ur: "({n} تصدیق شدہ ریویو)" },
+  statJobs: { en: "Jobs done here", ur: "یہاں مکمل کام" },
+  statExp: { en: "Experience", ur: "تجربہ" },
+  statHonest: { en: "Charged as agreed", ur: "طے شدہ قیمت لی" },
+  statRehire: { en: "Would hire again", ur: "دوبارہ بلائیں گے" },
+  memberSince: { en: "Member since {d}", ur: "{d} سے رکن" },
+  visitCharge: { en: "Visit charge", ur: "آنے کی فیس" },
+  voiceIntro: { en: "Voice intro", ur: "تعارفی آواز" },
+  recordedOnJoin: { en: "recorded when they joined", ur: "شامل ہوتے وقت ریکارڈ کی گئی" },
+  reviewSummary: { en: "Summary of verified reviews", ur: "تصدیق شدہ ریویو کا خلاصہ" },
+  typicalPrice: {
+    en: "Typical price for a {trade} job on Roshan Rozgar: {range} (median {m}, {n} jobs).",
+    ur: "روشن روزگار پر {trade} کے کام کی عام قیمت: {range} (درمیانی {m}، {n} کام)۔",
+  },
+  selectedBack: { en: "Selected — back to request", ur: "منتخب — درخواست پر واپس" },
+  selectForRequest: { en: "Select for my request", ur: "میری درخواست کے لیے منتخب کریں" },
+  reviews: { en: "Reviews", ur: "ریویو" },
+  noReviews: { en: "No reviews yet.", ur: "ابھی کوئی ریویو نہیں۔" },
+  newRequest: { en: "New request", ur: "نئی درخواست" },
+  workerNotFound: { en: "Worker not found.", ur: "کاریگر نہیں ملا۔" },
+  verifiedJob: { en: "Verified job", ur: "تصدیق شدہ کام" },
+  paidX: { en: "Paid {p}", ur: "{p} ادا کیے" },
+  askedMore: { en: "Asked for more than agreed", ur: "طے سے زیادہ مانگا" },
+
+  // jobs
+  jobStatus_requested: { en: "Agreeing on price", ur: "قیمت طے ہو رہی ہے" },
+  jobStatus_booked: { en: "Booked", ur: "کام پکا" },
+  jobStatus_completed: { en: "Completed", ur: "مکمل" },
+  jobStatus_declined: { en: "Declined by worker", ur: "کاریگر کا انکار" },
+  jobStatus_cancelled: { en: "Cancelled", ur: "منسوخ" },
+  jobStatus_expired: { en: "Worker got busy", ur: "کاریگر مصروف ہو گیا" },
+  offerByYou: { en: "Your offer Rs {a}", ur: "آپ کی پیشکش Rs {a}" },
+  offerByWorker: { en: "Worker asks Rs {a}", ur: "کاریگر کی قیمت Rs {a}" },
+  agreedX: { en: "Agreed Rs {a}", ur: "طے شدہ Rs {a}" },
+  yourTurn: { en: "Your turn", ur: "آپ کی باری" },
+  noJobs: { en: "No jobs yet.", ur: "ابھی کوئی کام نہیں۔" },
+  past: { en: "Past", ur: "پرانے" },
+
+  // thread
+  call: { en: "Call", ur: "فون" },
+  kmFromWorker: { en: "{km} km from worker", ur: "کاریگر سے {km} کلومیٹر" },
+  routeToCustomer: { en: "Route to customer", ur: "گاہک تک راستہ" },
+  routeToYou: { en: "Worker's route to you", ur: "کاریگر کا آپ تک راستہ" },
+  workersPrice: { en: "Worker's price", ur: "کاریگر کی قیمت" },
+  customersOffer: { en: "Customer's offer", ur: "گاہک کی پیشکش" },
+  offerAccepted: { en: "✅ Accepted", ur: "✅ منظور" },
+  offerReplaced: { en: "Replaced", ur: "بدل دی گئی" },
+  offerWaiting: { en: "Waiting for reply", ur: "جواب کا انتظار" },
+  offerNew: { en: "New price", ur: "نئی قیمت" },
+  acceptBook: { en: "Accept & book", ur: "منظور — کام پکا" },
+  original: { en: "Original:", ur: "اصل:" },
+  sendPrice: { en: "Propose this price", ur: "یہ قیمت بھیجیں" },
+  typeMessage: { en: "Type in English or Urdu…", ur: "یا لکھیں…" },
+  send: { en: "Send", ur: "بھیجیں" },
+  noteWorker: { en: "Voice notes are transcribed and translated for the customer", ur: "آپ کی آواز گاہک کے لیے لکھی اور ترجمہ کی جاتی ہے" },
+  noteCustomer: {
+    en: "Workers hear your message in Urdu · voice notes are translated to English",
+    ur: "کاریگر آپ کا پیغام اردو میں سنتا ہے · آواز کے پیغام کا ترجمہ ہوتا ہے",
+  },
+  jobDone: { en: "Job is done", ur: "کام مکمل" },
+  cancel: { en: "Cancel", ur: "منسوخ" },
+  cantDo: { en: "I can't do this job", ur: "یہ کام نہیں کر سکتا" },
+  cancelRequest: { en: "Cancel request", ur: "درخواست منسوخ کریں" },
+  thanksWorker: { en: "Thanks! Job complete. You're free for new jobs.", ur: "شکریہ! کام مکمل ہو گیا۔ آپ نئے کام کے لیے فارغ ہیں۔" },
+  thanksReviewed: { en: "Thanks — your review is on {name}'s profile.", ur: "شکریہ — آپ کا ریویو {name} کی پروفائل پر ہے۔" },
+  rateX: { en: "Rate {name}", ur: "{name} کو ریٹ کریں" },
+  tookOtherJob: { en: "This worker took another job.", ur: "یہ کاریگر دوسرا کام لے چکا ہے۔" },
+  findAnother: { en: "Find another worker", ur: "دوسرا کاریگر ڈھونڈیں" },
+  threadHint: { en: "Tap the mic to talk, or change the price and send it", ur: "مائیک دبا کر بات کریں، یا قیمت بدل کر بھیجیں" },
+  jobNotFound: { en: "This job doesn't exist or you're not part of it.", ur: "یہ کام موجود نہیں یا آپ اس کا حصہ نہیں۔" },
+  jobConfirmed: { en: "Job confirmed!", ur: "کام پکا ہو گیا!" },
+
+  // review form
+  howWas: { en: "How was {name}?", ur: "{name} کا کام کیسا تھا؟" },
+  paidAgreed: { en: "Did you pay the agreed Rs {a}?", ur: "کیا آپ نے طے شدہ Rs {a} ادا کیے؟" },
+  hireAgain: { en: "Would you hire again?", ur: "کیا دوبارہ بلائیں گے؟" },
+  reviewPh: { en: "Say or type a few words for the next customer", ur: "اگلے گاہک کے لیے چند الفاظ بولیں یا لکھیں" },
+  submitReview: { en: "Submit review", ur: "ریویو بھیجیں" },
+  reviewNote: {
+    en: "Only customers with a completed booking can review — every review is tied to a real job.",
+    ur: "صرف مکمل بکنگ والے گاہک ریویو دے سکتے ہیں — ہر ریویو ایک اصل کام سے جڑا ہے۔",
+  },
+
+  // worker onboarding
+  speakTitle: { en: "Speak about yourself", ur: "اپنے بارے میں بولیں" },
+  speakSub: { en: "No form to fill — just talk", ur: "کوئی فارم نہیں — بس بولیں" },
+  hintName: { en: "Name", ur: "نام" },
+  hintWork: { en: "Work", ur: "کام" },
+  hintExp: { en: "Experience", ur: "تجربہ" },
+  hintArea: { en: "Area", ur: "علاقہ" },
+  hintFee: { en: "Fee", ur: "فیس" },
+  listening: { en: "Speak… we're listening", ur: "بولیں… ہم سن رہے ہیں" },
+  example: { en: "Example:", ur: "مثال:" },
+  noStt: {
+    en: "This browser has no built-in speech recognition — your recording will be transcribed by AI on our server.",
+    ur: "اس براؤزر میں آواز پہچاننے کی سہولت نہیں — آپ کی ریکارڈنگ ہمارے سرور پر AI لکھے گا۔",
+  },
+  typeInstead: { en: "Type instead (helper)", ur: "لکھ کر (مددگار)" },
+  pickPictures: { en: "Pick with pictures", ur: "تصویروں سے چنیں" },
+  makeProfile: { en: "Make profile", ur: "پروفائل بنائیں" },
+  aiBuilding: { en: "AI is turning your words into a profile", ur: "AI آپ کی باتوں سے پروفائل بنا رہا ہے" },
+  profileTitle: { en: "Your profile", ur: "آپ کی پروفائل" },
+  profileSub: { en: "Check each box · tap ✏️ to fix", ur: "ہر خانہ دیکھیں · ٹھیک کرنے کے لیے ✏️ دبائیں" },
+  readProfile: { en: "Read my profile", ur: "میری پروفائل سنائیں" },
+  edit: { en: "Edit", ur: "بدلیں" },
+  name: { en: "Name", ur: "نام" },
+  work: { en: "Work", ur: "کام" },
+  experience: { en: "Experience", ur: "تجربہ" },
+  visitFee: { en: "Visit fee", ur: "آنے کی فیس" },
+  takeLocation: { en: "Use my location", ur: "میری لوکیشن لیں" },
+  allCorrect: { en: "All correct", ur: "سب ٹھیک ہے" },
+  speakAgain: { en: "Speak again", ur: "دوبارہ بولیں" },
+  photoTitle: { en: "Your photo", ur: "اپنی تصویر" },
+  photoSub: { en: "Customers trust a face they can recognise at the door", ur: "گاہک دروازے پر پہچانا ہوا چہرہ دیکھ کر بھروسہ کرتے ہیں" },
+  takePhoto: { en: "Take a photo", ur: "تصویر کھینچیں" },
+  finishProfile: { en: "Finish profile", ur: "پروفائل مکمل" },
+  skipPhoto: { en: "Continue without photo", ur: "بغیر تصویر آگے" },
+
+  // worker dashboard
+  youAreOnJob: { en: "You're on a job", ur: "آپ کام پر ہیں" },
+  readyForWork: { en: "Ready for work", ur: "کام کے لیے تیار" },
+  offline: { en: "Offline", ur: "آف لائن" },
+  subBusy: { en: "Engaged on a job — hidden from new customers", ur: "کام پر ہیں — نئے گاہکوں سے چھپے ہوئے" },
+  subOnline: { en: "Customers nearby can find you", ur: "قریبی گاہک آپ کو ڈھونڈ سکتے ہیں" },
+  subOffline: { en: "Hidden from customers", ur: "گاہکوں سے چھپے ہوئے" },
+  goOnline: { en: "Go online", ur: "آن لائن ہوں" },
+  goOffline: { en: "Go offline", ur: "آف لائن ہوں" },
+  currentJob: { en: "Current job", ur: "ابھی کا کام" },
+  route: { en: "Route", ur: "راستہ" },
+  chat: { en: "Chat", ur: "بات" },
+  jobCompleted: { en: "Job completed", ur: "کام مکمل ہو گیا" },
+  justNow: { en: "just now", ur: "ابھی" },
+  minAgo: { en: "{n} min ago", ur: "{n} منٹ پہلے" },
+  hoursAgo: { en: "{n} h ago", ur: "{n} گھنٹے پہلے" },
+  yourPrice: { en: "Your price", ur: "آپ کی قیمت" },
+  viewTalk: { en: "View / talk", ur: "دیکھیں / بات کریں" },
+  decline: { en: "Decline", ur: "انکار" },
+  newJobs: { en: "New jobs", ur: "نئے کام" },
+  emptyBusy: { en: "New jobs will come after you finish this one", ur: "کام ختم ہو تو نئے کام آئیں گے" },
+  emptyOnline: { en: "No new jobs yet. You'll hear a bell when one arrives.", ur: "ابھی کوئی نیا کام نہیں۔ کام آئے گا تو گھنٹی بجے گی۔" },
+  emptyOffline: { en: "Press the button above to start getting jobs", ur: "کام لینے کے لیے اوپر والا بٹن دبائیں" },
+  nJobs: { en: "{n} jobs", ur: "{n} کام" },
+  whatCustomersSee: { en: "What customers see about you", ur: "گاہک آپ کے بارے میں یہ دیکھتے ہیں" },
+} as const;
+
+export type MsgKey = keyof typeof M;
+
+export function translate(lang: Lang, key: MsgKey, vars?: Record<string, string | number>): string {
+  let s: string = M[key][lang];
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
+  return s;
+}
+
+/** Current UI language + helpers. Worker routes default to Urdu, everything else to English. */
+export function useT() {
+  const pathname = usePathname();
+  const pref = useLangStore((s) => s.pref);
+  const lang: Lang = pref ?? (pathname?.startsWith("/worker") ? "ur" : "en");
+  const isUr = lang === "ur";
+  const t = useCallback((key: MsgKey, vars?: Record<string, string | number>) => translate(lang, key, vars), [lang]);
+  return useMemo(
+    () => ({
+      lang,
+      isUr,
+      dir: (isUr ? "rtl" : "ltr") as "rtl" | "ltr",
+      /** Root class for a screen: Urdu font + generous line height. */
+      langClass: isUr ? "lang-ur" : "",
+      t,
+      /** Choose the field for the current language, falling back to the other one. */
+      pick: (en: string | null | undefined, ur: string | null | undefined) => (isUr ? ur || en : en || ur) ?? "",
+      date: (iso: string, opts: Intl.DateTimeFormatOptions) =>
+        new Date(iso).toLocaleDateString(isUr ? "ur-PK" : "en-PK", opts),
+    }),
+    [lang, isUr, t],
+  );
+}
