@@ -6,6 +6,8 @@ It is built for **workers who don't read or type comfortably**. A worker joins b
 
 > CUI Tech Fest · AI Web Forge — Problem Statement 1 (Roshan Rozgar)
 
+**Live demo:** https://roshan-rozgar-two.vercel.app — use the one-tap demo accounts on the home page (customer **Ayesha** and worker **Muhammad Aslam**), ideally in two different browsers side by side.
+
 ---
 
 ## The five required outcomes, and how they work
