@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { ZodError, type z } from "zod";
 import { auth } from "@/server/auth";
@@ -27,6 +28,8 @@ export function route<C>(fn: Handler<C>): Handler<C> {
     try {
       return await fn(req, ctx);
     } catch (e) {
+      // Let Next.js internal control-flow errors (e.g. prerender bail-out) propagate.
+      unstable_rethrow(e);
       if (e instanceof HttpError) return json({ error: e.message, code: e.code }, e.status);
       if (e instanceof ZodError)
         return json({ error: "Invalid request", issues: e.issues.slice(0, 5) }, 400);

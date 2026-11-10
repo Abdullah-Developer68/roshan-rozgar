@@ -71,3 +71,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .mic-live { animation: none; }
 }
+
+/* Large Nastaliq headings have very tall ascenders/descenders. */
+.urdu.text-xl,
+.urdu.text-2xl,
+.urdu.text-3xl,
+.urdu.text-4xl {
+  line-height: 2.4;
+}

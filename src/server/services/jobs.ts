@@ -29,8 +29,8 @@ async function loadJobRows(where: ReturnType<typeof and>) {
       worker: workers,
       customerName: user.name,
       customerPhone: user.phoneNumber,
-      workerPhone: sql<string | null>`(select phone_number from "user" u where u.id = ${workers.userId})`,
-      hasReview: sql<boolean>`exists (select 1 from ${reviews} where ${reviews.jobId} = ${jobs.id})`,
+      workerPhone: sql<string | null>`(select wu.phone_number from "user" wu where wu.id = "workers"."user_id")`,
+      hasReview: sql<boolean>`exists (select 1 from reviews rv where rv.job_id = "jobs"."id")`,
     })
     .from(jobs)
     .innerJoin(workers, eq(workers.id, jobs.workerId))
@@ -179,8 +179,8 @@ export async function createJobRequests(customer: Viewer, input: z.infer<typeof 
   const ws = await db
     .select({
       w: workers,
-      engaged: sql<boolean>`exists (select 1 from ${jobs} j where j.worker_id = ${workers.id} and j.status = 'booked')`,
-      alreadyOpen: sql<boolean>`exists (select 1 from ${jobs} j where j.worker_id = ${workers.id} and j.customer_id = ${customer.id} and j.status in ('requested','booked'))`,
+      engaged: sql<boolean>`exists (select 1 from jobs j where j.worker_id = "workers"."id" and j.status = 'booked')`,
+      alreadyOpen: sql<boolean>`exists (select 1 from jobs j where j.worker_id = "workers"."id" and j.customer_id = ${customer.id} and j.status in ('requested','booked'))`,
     })
     .from(workers)
     .where(inArray(workers.id, input.workerIds));

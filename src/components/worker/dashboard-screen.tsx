@@ -48,7 +48,7 @@ function AvailabilitySwitch() {
         <span className="urdu text-2xl font-bold" lang="ur">
           {busy ? "آپ کام پر ہیں" : on ? "کام کے لیے تیار" : "آف لائن"}
         </span>
-        <span className="text-xs text-white/80" dir="ltr">
+        <span className="mt-1 text-xs text-white/80" dir="ltr">
           {busy ? "Engaged on a job — hidden from new customers" : on ? "Customers nearby can find you" : "Hidden from customers"}
         </span>
       </div>

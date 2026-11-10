@@ -102,13 +102,13 @@ function LocationRow() {
   return (
     <div className="flex flex-col gap-2 border-t border-line pt-3 sm:flex-row sm:items-center">
       <div className="flex items-center gap-2">
-        <button onClick={() => void locateMe()} className="flex h-10 items-center gap-1.5 rounded-full bg-brand/10 px-3 text-sm font-semibold text-brand">
+        <button onClick={() => void locateMe()} className="flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-brand/10 px-3 text-sm font-semibold text-brand">
           {locating ? <Spinner className="size-4" /> : <LocateFixed className="size-4" />} {locSource === "gps" ? "Using GPS" : "Use my location"}
         </button>
         <select
           value={areaId}
           onChange={(e) => setArea(e.target.value)}
-          className="h-10 rounded-full bg-bg px-3 text-sm ring-1 ring-line"
+          className="h-10 min-w-0 flex-1 rounded-full bg-bg px-3 text-sm ring-1 ring-line"
           aria-label="Area"
         >
           {(["Islamabad", "Rawalpindi"] as const).map((city) => (
@@ -124,7 +124,7 @@ function LocationRow() {
         value={addressNote}
         onChange={(e) => setAddressNote(e.target.value)}
         placeholder="House / street (shared only after booking)"
-        className="h-10 min-w-0 flex-1 rounded-full bg-bg px-4 text-sm outline-none ring-1 ring-line"
+        className="h-10 min-w-0 flex-1 shrink-0 rounded-full bg-bg px-4 text-sm outline-none ring-1 ring-line"
       />
     </div>
   );

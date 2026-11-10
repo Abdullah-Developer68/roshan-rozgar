@@ -54,7 +54,9 @@ export function toWorkerPublic(w: Worker, engaged: boolean): WorkerPublic {
 }
 
 /** SQL expression: does this worker currently have a booked (engaged) job? */
-const engagedExpr = sql<boolean>`exists (select 1 from ${jobs} where ${jobs.workerId} = ${workers.id} and ${jobs.status} = 'booked')`;
+// NB: correlated subqueries use explicit, qualified identifiers — Drizzle renders columns
+// unqualified in single-table selects, which would silently bind to the inner table.
+const engagedExpr = sql<boolean>`exists (select 1 from jobs ej where ej.worker_id = "workers"."id" and ej.status = 'booked')`;
 
 export async function isWorkerEngaged(workerId: string): Promise<boolean> {
   const [row] = await db

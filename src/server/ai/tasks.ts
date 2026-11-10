@@ -18,6 +18,11 @@ const tradeField = z.preprocess(
 const strList = z.preprocess((v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string") : []), z.array(z.string()));
 const str = z.preprocess((v) => (typeof v === "string" ? v.trim() : ""), z.string());
 const nullableStr = z.preprocess((v) => (typeof v === "string" && v.trim() ? v.trim() : null), z.string().nullable());
+// Workers read/listen to Urdu script; free models sometimes answer in Roman Urdu. Drop those.
+const hasUrduScript = (v: unknown) => typeof v === "string" && /[\u0600-\u06FF]/.test(v);
+const urduStr = z.preprocess((v) => (hasUrduScript(v) ? (v as string).trim() : ""), z.string());
+const nullableUrduStr = z.preprocess((v) => (hasUrduScript(v) ? (v as string).trim() : null), z.string().nullable());
+const URDU_RULE = "All fields ending in Ur MUST be written in Urdu (Arabic/Nastaliq) script, never Roman Urdu.";
 
 const AREA_HINT = AREAS.map((a) => a.en).join(", ");
 const TRADE_HINT = TRADE_IDS.map((id) => `${id} (${TRADES[id].en}, ${TRADES[id].ur})`).join("; ");
@@ -28,13 +33,13 @@ const TRADE_HINT = TRADE_IDS.map((id) => `${id} (${TRADES[id].en}, ${TRADES[id].
 
 export const workerProfileSchema = z.object({
   name: nullableStr,
-  nameUr: nullableStr,
+  nameUr: nullableUrduStr,
   trade: tradeField,
   skills: strList,
   experienceYears: nullableNum,
   area: nullableStr,
   visitCharge: nullableNum,
-  bioUr: str,
+  bioUr: urduStr,
   bioEn: str,
 });
 export type WorkerProfileDraft = z.infer<typeof workerProfileSchema> & { areaId: string | null };
@@ -52,7 +57,7 @@ export async function extractWorkerProfile(
         content: `You help low-literacy Pakistani tradespeople build a work profile by speaking. The input is a speech-recognition transcript in Urdu, Roman Urdu, Punjabi or English and may contain recognition mistakes; interpret it charitably.
 Return ONLY a JSON object:
 {"name": string|null (Latin script), "nameUr": string|null (Urdu script), "trade": one of [${TRADE_IDS.join(", ")}] or null, "skills": string[] (2-6 short English skill phrases), "experienceYears": number|null, "area": string|null (neighbourhood as spoken; known areas: ${AREA_HINT}), "visitCharge": number|null (PKR visit/inspection fee), "bioUr": string (one short, simple Urdu sentence describing the worker, 20 words max), "bioEn": string (same in English)}
-Trades: ${TRADE_HINT}. Convert spoken numbers to digits (e.g. پندرہ سو = 1500). Do not invent facts that were not said; use null.`,
+Trades: ${TRADE_HINT}. Convert spoken numbers to digits (e.g. پندرہ سو = 1500). Do not invent facts that were not said; use null. ${URDU_RULE}`,
       },
       { role: "user", content: transcript },
     ],
@@ -96,12 +101,12 @@ function fallbackWorkerProfile(transcript: string): WorkerProfileDraft {
 export const triageSchema = z.object({
   trade: tradeField,
   summaryEn: str,
-  summaryUr: str,
+  summaryUr: urduStr,
   urgency: z.preprocess((v) => (v === "urgent" || v === "low" ? v : "normal"), z.enum(["low", "normal", "urgent"])),
   estimateMin: nullableNum,
   estimateMax: nullableNum,
   safetyTipEn: nullableStr,
-  safetyTipUr: nullableStr,
+  safetyTipUr: nullableUrduStr,
 });
 export type Triage = z.infer<typeof triageSchema>;
 
@@ -125,7 +130,7 @@ export async function triageProblem(input: {
         content: `You triage household repair requests in Islamabad/Rawalpindi, Pakistan. The customer may write or speak in English, Urdu or Roman Urdu, and may attach a photo of the problem.
 Decide which tradesperson is needed and describe the job so a worker who reads only simple Urdu understands it.
 Return ONLY JSON: {"trade": one of [${TRADE_IDS.join(", ")}] or null, "summaryEn": string (one sentence, what is wrong + what work is likely needed), "summaryUr": string (same, simple Urdu), "urgency": "low"|"normal"|"urgent" (urgent = safety risk, water flooding, sparking, no power), "estimateMin": number (PKR, typical labour cost in 2026 Islamabad), "estimateMax": number, "safetyTipEn": string|null (one short safety step while waiting, only if relevant), "safetyTipUr": string|null}
-Trades: ${TRADE_HINT}.`,
+Trades: ${TRADE_HINT}. ${URDU_RULE}`,
       },
       { role: "user", content: userParts },
     ],
@@ -157,7 +162,7 @@ Trades: ${TRADE_HINT}.`,
 
 export const messageAssistSchema = z.object({
   textEn: str,
-  textUr: str,
+  textUr: urduStr,
   offerAmount: nullableNum,
 });
 export type MessageAssist = z.infer<typeof messageAssistSchema>;
@@ -176,7 +181,7 @@ export async function assistMessage(input: {
       {
         role: "system",
         content: `You relay chat messages between a household customer and a ${String(trade(input.trade))} in Pakistan. The worker reads only simple Urdu (and listens to it read aloud); the customer reads English. The message may be a speech-recognition transcript in Urdu, Roman Urdu or English with mistakes.
-Return ONLY JSON: {"textEn": string (clear English rendering), "textUr": string (simple Urdu script rendering), "offerAmount": number|null (PKR amount ONLY if the sender is proposing or quoting a price for this job, else null)}`,
+Return ONLY JSON: {"textEn": string (clear English rendering), "textUr": string (simple Urdu script rendering), "offerAmount": number|null (PKR amount ONLY if the sender is proposing or quoting a price for this job, else null)} ${URDU_RULE}`,
       },
       { role: "user", content: `Sender: ${input.senderRole}\nMessage: ${input.text}` },
     ],
@@ -204,7 +209,7 @@ function trade(t: string): string {
 
 export const reviewSummarySchema = z.object({
   summaryEn: str,
-  summaryUr: str,
+  summaryUr: urduStr,
   tags: strList,
 });
 
@@ -227,12 +232,15 @@ export async function summarizeReviews(input: {
     messages: [
       {
         role: "system",
-        content: `Summarise verified customer reviews of a ${input.tradeEn} so the next household can decide quickly whether to let them into their home. Be balanced: mention recurring complaints too. Return ONLY JSON: {"summaryEn": string (max 2 sentences), "summaryUr": string (same in simple Urdu), "tags": string[] (3-5 short English strengths or warnings, e.g. "On time", "Fair price", "Sometimes late")}`,
+        content: `Summarise verified customer reviews of a ${input.tradeEn} so the next household can decide quickly whether to let them into their home. Be balanced: mention recurring complaints too. Return ONLY JSON: {"summaryEn": string (max 2 sentences), "summaryUr": string (same in simple Urdu), "tags": string[] (3-5 short English strengths or warnings, e.g. "On time", "Fair price", "Sometimes late")} ${URDU_RULE}`,
       },
       { role: "user", content: lines },
     ],
   });
-  if (res.ok) return { data: res.data, source: "ai" };
+  if (res.ok) {
+    const fb = fallbackReviewSummary(input.reviews);
+    return { data: { ...res.data, summaryUr: res.data.summaryUr || fb.summaryUr }, source: "ai" };
+  }
   return { data: fallbackReviewSummary(input.reviews), source: "fallback", note: res.error };
 }
 
