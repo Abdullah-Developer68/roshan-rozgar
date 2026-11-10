@@ -6,6 +6,8 @@ import { MicButton } from "@/components/ui/mic-button";
 import { Spinner } from "@/components/ui/spinner";
 import { REVIEW_TAGS } from "@/lib/validation";
 import { useT } from "@/lib/i18n";
+import { SttStatus } from "@/components/ui/stt-status";
+import { REVIEW_TAG_ICONS } from "@/components/ui/icons";
 
 /** Post-job review: structured signals (stars, tags, price honesty) + an optional spoken/typed comment. */
 export function ReviewForm() {
@@ -55,6 +57,7 @@ export function ReviewForm() {
       <div className="flex flex-wrap gap-2">
         {REVIEW_TAGS.map((tag) => {
           const on = tags.includes(tag.id);
+          const TagIcon = REVIEW_TAG_ICONS[tag.id];
           return (
             <button
               key={tag.id}
@@ -62,7 +65,7 @@ export function ReviewForm() {
               onClick={() => setTags(on ? tags.filter((x) => x !== tag.id) : [...tags, tag.id])}
               className={`rounded-full px-3 py-1.5 text-sm ${on ? "bg-brand text-white" : "bg-bg border border-border"}`}
             >
-              {tag.emoji} {pick(tag.id, tag.ur)}
+              {TagIcon && <TagIcon className="me-1 inline size-3.5" />} {pick(tag.id, tag.ur)}
             </button>
           );
         })}
@@ -86,6 +89,7 @@ export function ReviewForm() {
           className="min-w-0 flex-1 rounded-lg bg-bg p-3 outline-none border border-border"
         />
       </div>
+      <SttStatus ownerId="review" />
       <button disabled={!rating || acting} className="flex h-12 items-center justify-center rounded-lg bg-brand font-semibold text-white disabled:opacity-50">
         {acting ? <Spinner /> : t("submitReview")}
       </button>

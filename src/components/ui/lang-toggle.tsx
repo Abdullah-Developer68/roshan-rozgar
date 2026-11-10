@@ -1,5 +1,8 @@
 "use client";
 import { Languages } from "lucide-react";
+import { motion } from "motion/react";
+import { useId } from "react";
+import { spring } from "@/components/ui/motion";
 import { useT } from "@/lib/i18n";
 import { useLangStore } from "@/stores/lang-store";
 
@@ -7,6 +10,7 @@ import { useLangStore } from "@/stores/lang-store";
 export function LangToggle({ className = "" }: { className?: string }) {
   const { lang, t } = useT();
   const setLang = useLangStore((s) => s.setLang);
+  const pillId = useId();
   return (
     <div
       role="group"
@@ -26,9 +30,10 @@ export function LangToggle({ className = "" }: { className?: string }) {
           type="button"
           aria-pressed={lang === v}
           onClick={() => setLang(v)}
-          className={`h-7 rounded-md px-2.5 text-[12px] font-medium transition ${lang === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+          className={`relative h-7 rounded-md px-2.5 text-[12px] font-medium transition-colors ${lang === v ? "text-background" : "text-muted-foreground hover:text-foreground"}`}
         >
-          <span className={`font-sans leading-none ${v === "ur" ? "text-[13px]" : ""}`}>{label}</span>
+          {lang === v && <motion.span layoutId={`lang-pill-${pillId}`} transition={spring} className="absolute inset-0 rounded-md bg-foreground" />}
+          <span className={`relative font-sans leading-none ${v === "ur" ? "text-[13px]" : ""}`}>{label}</span>
         </button>
       ))}
     </div>

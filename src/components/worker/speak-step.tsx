@@ -1,5 +1,5 @@
 "use client";
-import { Keyboard, LayoutGrid } from "lucide-react";
+import { Banknote, CalendarDays, Keyboard, LayoutGrid, MapPin, Mic, User, Wrench, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { useVoiceStore } from "@/stores/voice-store";
@@ -9,13 +9,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { P } from "@/lib/phrases";
 import { sttSupported } from "@/lib/client/speech";
 import { useT, type MsgKey } from "@/lib/i18n";
+import { SttStatus } from "@/components/ui/stt-status";
 
-const HINTS: { icon: string; key: MsgKey }[] = [
-  { icon: "👤", key: "hintName" },
-  { icon: "🔧", key: "hintWork" },
-  { icon: "📅", key: "hintExp" },
-  { icon: "📍", key: "hintArea" },
-  { icon: "💰", key: "hintFee" },
+const HINTS: { icon: LucideIcon; key: MsgKey }[] = [
+  { icon: User, key: "hintName" },
+  { icon: Wrench, key: "hintWork" },
+  { icon: CalendarDays, key: "hintExp" },
+  { icon: MapPin, key: "hintArea" },
+  { icon: Banknote, key: "hintFee" },
 ];
 
 /** Which language the microphone listens for (defaults to the UI language). */
@@ -35,7 +36,7 @@ function MicLangToggle() {
           onClick={() => setSttLang(v)}
           className={`rounded-full px-4 py-1 text-sm font-semibold ${sttLang === v ? "bg-brand text-white" : "bg-card text-muted-foreground border border-border"}`}
         >
-          🎤 <span className={v === "ur-PK" ? "font-urdu" : "font-sans"}>{label}</span>
+          <Mic className="inline size-3.5" /> <span className={v === "ur-PK" ? "font-urdu" : "font-sans"}>{label}</span>
         </button>
       ))}
     </div>
@@ -95,7 +96,7 @@ export function SpeakStep() {
       <ul className="grid grid-cols-5 gap-2">
         {HINTS.map((h) => (
           <li key={h.key} className="flex flex-col items-center rounded-lg bg-card py-2 shadow-sm border border-border">
-            <span className="text-2xl" aria-hidden>{h.icon}</span>
+            <h.icon className="size-6" strokeWidth={1.6} aria-hidden />
             <span className="text-sm">{t(h.key)}</span>
           </li>
         ))}
@@ -103,6 +104,7 @@ export function SpeakStep() {
 
       <div className="flex flex-col items-center gap-3 py-2">
         <MicButton id="onboard" record onDone={(r) => void extract(r.text, r.blob, r.mediaId)} />
+        <SttStatus ownerId="onboard" className="w-full max-w-xs justify-center" />
         <MicLangToggle />
         {!sttSupported() && <p className="text-center text-xs text-muted-foreground">{t("noStt")}</p>}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 import { Mic, Square } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { useVoiceStore, type VoiceResult } from "@/stores/voice-store";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -43,18 +44,31 @@ export function MicButton({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <button
+      <motion.button
         type="button"
+        whileTap={{ scale: 0.92 }}
+        whileHover={{ scale: 1.03 }}
         disabled={disabled || processing}
         aria-label={live ? "Stop recording" : "Start speaking"}
         aria-pressed={live}
         onClick={() => (live ? stop() : void start({ ownerId: id, lang: lang ?? sttLang, record, onDone }))}
-        className={`relative flex ${dim} items-center justify-center rounded-full text-white shadow-lg transition active:scale-95 disabled:opacity-60 ${
+        className={`relative flex ${dim} items-center justify-center rounded-full text-white shadow-lg transition-colors disabled:opacity-60 ${
           live ? "mic-live bg-danger" : "bg-brand hover:bg-brand-2"
         }`}
       >
-        {processing ? <Spinner className={icon} /> : live ? <Square className={`${icon} fill-white`} /> : <Mic className={icon} />}
-      </button>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={processing ? "p" : live ? "l" : "i"}
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.15 }}
+            className="flex"
+          >
+            {processing ? <Spinner className={icon} /> : live ? <Square className={`${icon} fill-white`} /> : <Mic className={icon} />}
+          </motion.span>
+        </AnimatePresence>
+      </motion.button>
       {size === "xl" && (
         <span className="h-5 text-sm font-semibold tabular-nums text-muted-foreground">{live ? `0:${String(secs).padStart(2, "0")}` : ""}</span>
       )}

@@ -37,4 +37,7 @@ Tokens live in `src/app/globals.css`; components come from shadcn/ui (`src/compo
 - **Type:** Geist, medium weight, tight tracking. Display headings use `.display` (+ `.display-faint` for the grey second line); small caps labels use `.eyebrow`. Urdu uses Nastaliq via `.urdu` / the `lang-ur` screen class.
 - **Shape:** `rounded-lg` controls, `rounded-xl` cards (`.surface`), hairline borders instead of rings, shadows only on floating layers.
 - **Layout:** thin sticky header with hairline bottom border; sections separated by `.section-rule`; framed grids use `.frame` + hairline cell borders.
+- **Icons:** Lucide only (`lucide-react`), line style. No emoji anywhere in the UI. Trade and review-tag icons come from `src/components/ui/icons.tsx` (`TradeIcon`, `REVIEW_TAG_ICONS`).
+- **Motion:** animate with `motion/react` only, through the primitives in `src/components/ui/motion.tsx` (`Reveal`, `Stagger`/`StaggerItem`, `listItem`, `spring`, `ease`). Keep it calm: fades, short rises, spring list enter/exit. `MotionProvider` honours reduced-motion.
+- **Speech-to-text:** browser Web Speech for live captions; when it is missing or returns nothing, transcribe on-device with Whisper (`src/lib/client/whisper.ts` + worker). The server/OpenRouter audio path is a last resort.
 - **Buttons:** shadcn `<Button>` — `default` (black) for the primary action, `outline` for secondary, `success` for confirm/accept, size `touch` in the worker flow (low-literacy users need big targets and green/red cues; do not make the worker flow monochrome).

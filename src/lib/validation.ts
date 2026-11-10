@@ -72,12 +72,12 @@ export const reviewInput = z.object({
 });
 
 export const REVIEW_TAGS = [
-  { id: "On time", ur: "وقت پر آئے", emoji: "⏰" },
-  { id: "Fair price", ur: "مناسب قیمت", emoji: "💰" },
-  { id: "Fixed it first time", ur: "پہلی بار میں ٹھیک", emoji: "✅" },
-  { id: "Clean work", ur: "صاف کام", emoji: "🧹" },
-  { id: "Polite", ur: "اچھا رویہ", emoji: "🙂" },
-  { id: "Explained the problem", ur: "مسئلہ سمجھایا", emoji: "💬" },
-  { id: "Late", ur: "دیر سے آئے", emoji: "🐢" },
-  { id: "Overcharged", ur: "زیادہ پیسے", emoji: "⚠️" },
+  { id: "On time", ur: "وقت پر آئے" },
+  { id: "Fair price", ur: "مناسب قیمت" },
+  { id: "Fixed it first time", ur: "پہلی بار میں ٹھیک" },
+  { id: "Clean work", ur: "صاف کام" },
+  { id: "Polite", ur: "اچھا رویہ" },
+  { id: "Explained the problem", ur: "مسئلہ سمجھایا" },
+  { id: "Late", ur: "دیر سے آئے" },
+  { id: "Overcharged", ur: "زیادہ پیسے" },
 ] as const;

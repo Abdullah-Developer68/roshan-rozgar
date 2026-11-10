@@ -2,6 +2,8 @@
 import { ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
+import { motion } from "motion/react";
+import { listItem } from "@/components/ui/motion";
 import { useBrowseStore } from "@/stores/browse-store";
 import { useSessionStore } from "@/stores/session-store";
 import { CustomerShell } from "@/components/customer/customer-shell";
@@ -25,7 +27,7 @@ function JobRow({ job }: { job: JobDTO }) {
   const needsAction =
     (job.status === "requested" && job.pendingOffer?.by === "worker") || (job.status === "completed" && !job.hasReview);
   return (
-    <li>
+    <motion.li layout {...listItem}>
       <Link href={`/customer/jobs/${job.id}`} className="flex items-center gap-3 rounded-lg bg-card p-3 shadow-sm border border-border">
         <Avatar name={job.worker.name} photoUrl={job.worker.photoUrl} trade={job.trade} size="size-12" />
         <div className="min-w-0 flex-1">
@@ -46,7 +48,7 @@ function JobRow({ job }: { job: JobDTO }) {
         </div>
         <ChevronRight className="size-5 text-muted-foreground rtl:rotate-180" />
       </Link>
-    </li>
+    </motion.li>
   );
 }
 

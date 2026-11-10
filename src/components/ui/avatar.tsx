@@ -1,4 +1,5 @@
-import { TRADES, type TradeId } from "@/lib/trades";
+import type { TradeId } from "@/lib/trades";
+import { TradeIcon } from "@/components/ui/icons";
 
 export function Avatar({
   name,
@@ -29,7 +30,7 @@ export function Avatar({
       )}
       {trade && (
         <span className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-card text-sm shadow border border-border">
-          {TRADES[trade].emoji}
+          <TradeIcon trade={trade} className="size-3.5" />
         </span>
       )}
     </span>

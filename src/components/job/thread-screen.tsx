@@ -3,6 +3,8 @@ import { ArrowLeft, ArrowRight, CheckCheck, MapPin, Navigation, Phone, SendHoriz
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { spring } from "@/components/ui/motion";
 import { useJobStore } from "@/stores/job-store";
 import { useSessionStore } from "@/stores/session-store";
 import { useVoiceStore } from "@/stores/voice-store";
@@ -15,6 +17,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { TradePill } from "@/components/ui/trade-pill";
 import { ReviewForm } from "@/components/job/review-form";
+import { SttStatus } from "@/components/ui/stt-status";
 import { AREA_BY_ID } from "@/lib/areas";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { P } from "@/lib/phrases";
@@ -107,7 +110,7 @@ function JobCard() {
           <Navigation className="size-4" /> {isWorker ? t("routeToCustomer") : t("routeToYou")}
         </a>
       )}
-      {job.addressNote && <p className="text-sm" dir="auto">📍 {job.addressNote}</p>}
+      {job.addressNote && <p className="flex items-center gap-1.5 text-sm" dir="auto"><MapPin className="size-4 shrink-0" /> {job.addressNote}</p>}
     </section>
   );
 }
@@ -120,9 +123,9 @@ function Bubble({ m }: { m: MessageDTO }) {
 
   if (m.kind === "system")
     return (
-      <li className="mx-auto max-w-[85%] rounded-lg bg-zinc-100 px-3 py-1.5 text-center text-xs text-zinc-700">
+      <motion.li layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto max-w-[85%] rounded-lg bg-muted px-3 py-1.5 text-center text-xs text-muted-foreground">
         {pick(m.textEn, m.textUr) || m.text}
-      </li>
+      </motion.li>
     );
 
   const mine = m.mine;
@@ -133,7 +136,12 @@ function Bubble({ m }: { m: MessageDTO }) {
     const canAccept = pending && !mine;
     const who = m.senderRole === "worker" ? t("workersPrice") : t("customersOffer");
     return (
-      <li className={`${align} w-[80%] max-w-xs rounded-xl p-4 shadow-sm ring-2 ${m.offerStatus === "accepted" ? "bg-emerald-50 ring-ok" : pending ? "bg-sun-soft ring-sun" : "bg-card opacity-60 ring-line"}`}>
+      <motion.li
+        layout
+        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={spring}
+        className={`${align} w-[80%] max-w-xs rounded-xl p-4 shadow-sm ring-2 ${m.offerStatus === "accepted" ? "bg-emerald-50 ring-ok" : pending ? "bg-sun-soft ring-sun" : "bg-card opacity-60 ring-line"}`}>
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-semibold">{who}</span>
           <AiBadge source={m.aiSource} />
@@ -152,14 +160,19 @@ function Bubble({ m }: { m: MessageDTO }) {
             <span className="text-lg font-semibold">{t("acceptBook")}</span>
           </button>
         )}
-      </li>
+      </motion.li>
     );
   }
 
   const primary = pick(m.textEn, m.textUr) || m.text;
   const secondary = primary !== m.text ? m.text : null;
   return (
-    <li className={`${align} flex max-w-[85%] flex-col gap-1.5 rounded-xl px-4 py-3 shadow-sm ${mine ? "bg-brand text-white" : "bg-card border border-border"}`}>
+    <motion.li
+      layout
+      initial={{ opacity: 0, y: 12, x: mine ? 12 : -12 }}
+      animate={{ opacity: 1, y: 0, x: 0 }}
+      transition={spring}
+      className={`${align} flex max-w-[85%] flex-col gap-1.5 rounded-xl px-4 py-3 shadow-sm ${mine ? "bg-brand text-white" : "bg-card border border-border"}`}>
       {m.audioUrl && <AudioNote src={m.audioUrl} tone={mine ? "dark" : "light"} />}
       {primary && (
         <div className="flex items-start gap-2">
@@ -175,7 +188,7 @@ function Bubble({ m }: { m: MessageDTO }) {
           <AiBadge source={m.aiSource} />
         </span>
       )}
-    </li>
+    </motion.li>
   );
 }
 
@@ -187,9 +200,11 @@ function Messages() {
   }, [messages.length]);
   return (
     <ul className="flex flex-col gap-3 py-2">
-      {messages.map((m) => (
-        <Bubble key={m.id} m={m} />
-      ))}
+      <AnimatePresence initial={false}>
+        {messages.map((m) => (
+          <Bubble key={m.id} m={m} />
+        ))}
+      </AnimatePresence>
       <li ref={endRef} aria-hidden />
     </ul>
   );
@@ -242,6 +257,7 @@ function Composer() {
   return (
     <div className="flex flex-col gap-2">
       <LiveCaption />
+      <SttStatus ownerId="thread" />
       <div className="flex items-center gap-2">
         <MicButton id="thread" size="md" record onDone={(r) => void sendVoice(r)} disabled={sending} />
         <form

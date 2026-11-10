@@ -1,8 +1,10 @@
 "use client";
-import { Check, CheckCheck, LogOut, MapPin, MessageCircle, Navigation, Phone, Power, X } from "lucide-react";
+import { Bell, Check, CheckCheck, LogOut, Moon, MapPin, MessageCircle, Navigation, Phone, Power, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { listItem, ease } from "@/components/ui/motion";
 import { useSessionStore } from "@/stores/session-store";
 import { useWorkerDashStore } from "@/stores/worker-dash-store";
 import { WorkerShell } from "@/components/worker/worker-shell";
@@ -11,7 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Stars } from "@/components/ui/stars";
 import { Avatar } from "@/components/ui/avatar";
 import { AiBadge } from "@/components/ui/ai-badge";
-import { TRADES } from "@/lib/trades";
+import { TradeIcon } from "@/components/ui/icons";
 import { AREA_BY_ID } from "@/lib/areas";
 import { P } from "@/lib/phrases";
 import { useT } from "@/lib/i18n";
@@ -37,7 +39,11 @@ function AvailabilitySwitch() {
   const on = worker.isOnline;
   const phrase = busy ? P.busy : on ? P.online : P.offline;
   return (
-    <div className={`flex items-center gap-3 rounded-xl p-4 text-white shadow-sm ${busy ? "bg-busy" : on ? "bg-ok" : "bg-zinc-500"}`}>
+    <motion.div
+      animate={{ backgroundColor: busy ? "#ea580c" : on ? "#16a34a" : "#71717a" }}
+      transition={{ duration: 0.4, ease }}
+      className="flex items-center gap-3 rounded-xl p-4 text-white shadow-sm"
+    >
       <button
         onClick={() => void toggleOnline()}
         disabled={toggling}
@@ -45,14 +51,18 @@ function AvailabilitySwitch() {
         aria-label={on ? t("goOffline") : t("goOnline")}
         className="flex size-20 shrink-0 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/40 active:scale-95"
       >
-        {toggling ? <Spinner className="size-9" /> : <Power className="size-10" strokeWidth={2.5} />}
+        {toggling ? <Spinner className="size-9" /> : (
+          <motion.span key={String(on)} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} transition={{ duration: 0.35, ease }} className="flex">
+            <Power className="size-10" strokeWidth={2.5} />
+          </motion.span>
+        )}
       </button>
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="text-2xl font-bold">{busy ? t("youAreOnJob") : on ? t("readyForWork") : t("offline")}</span>
         <span className="mt-1 text-xs text-white/85">{busy ? t("subBusy") : on ? t("subOnline") : t("subOffline")}</span>
       </div>
       <SpeakButton ur={phrase.ur} hi={phrase.hi} en={phrase.en} />
-    </div>
+    </motion.div>
   );
 }
 
@@ -65,7 +75,12 @@ function ActiveJob() {
   const sayUr = `${job.customer.name} کا کام۔ ${job.summaryUr ?? ""} قیمت ${job.agreedPrice} روپے۔`;
   const sayEn = `Job for ${job.customer.name}. ${job.summaryEn ?? job.problemText} Price ${job.agreedPrice} rupees.`;
   return (
-    <section className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-2 ring-busy">
+    <motion.section
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease }}
+      className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-2 ring-busy"
+    >
       <div className="flex items-center justify-between">
         <span className="text-lg font-bold text-busy">{t("currentJob")}</span>
         <SpeakButton ur={sayUr} en={sayEn} />
@@ -113,7 +128,7 @@ function ActiveJob() {
         <CheckCheck className="size-8" />
         <span className="text-xl font-bold">{t("jobDone")}</span>
       </button>
-    </section>
+    </motion.section>
   );
 }
 
@@ -123,16 +138,17 @@ function RequestCard({ job }: { job: JobDTO }) {
   const router = useRouter();
   const { t, pick } = useT();
   const ago = useTimeAgo();
-  const tr = TRADES[job.trade];
   const area = AREA_BY_ID[job.areaId];
   const offer = job.pendingOffer;
   const summary = pick(job.summaryEn, job.summaryUr) || job.problemText;
   const sayUr = `نیا کام۔ ${job.summaryUr || job.problemText}۔ ${job.distanceKm ?? ""} کلومیٹر دور۔${offer ? ` گاہک ${offer.amount} روپے دے رہا ہے۔` : ""}`;
   const sayEn = `New job. ${job.summaryEn || job.problemText}. ${job.distanceKm ?? ""} kilometres away.${offer ? ` The customer offers ${offer.amount} rupees.` : ""}`;
   return (
-    <li className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm border border-border">
+    <motion.li layout {...listItem} className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm border border-border">
       <div className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-bg text-3xl" aria-hidden>{tr.emoji}</span>
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted" aria-hidden>
+          <TradeIcon trade={job.trade} className="size-6" />
+        </span>
         <div className="min-w-0 flex-1">
           <p className="text-lg">{summary}</p>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
@@ -170,7 +186,7 @@ function RequestCard({ job }: { job: JobDTO }) {
           <X className="size-8" strokeWidth={3} />
         </button>
       </div>
-    </li>
+    </motion.li>
   );
 }
 
@@ -182,7 +198,9 @@ function Requests() {
   if (!requests.length)
     return (
       <div className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-line p-6 text-center">
-        <span className="text-4xl" aria-hidden>{worker.isOnline ? "🔔" : "😴"}</span>
+        <span className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground" aria-hidden>
+          {worker.isOnline ? <Bell className="size-7" strokeWidth={1.6} /> : <Moon className="size-7" strokeWidth={1.6} />}
+        </span>
         <p className="text-lg">
           {worker.availability === "busy" ? t("emptyBusy") : worker.isOnline ? t("emptyOnline") : t("emptyOffline")}
         </p>
@@ -194,9 +212,11 @@ function Requests() {
         {t("newJobs")} <span className="rounded-full bg-danger px-2 text-sm text-white" dir="ltr">{requests.length}</span>
       </h2>
       <ul className="flex flex-col gap-3">
-        {requests.map((j) => (
-          <RequestCard key={j.id} job={j} />
-        ))}
+        <AnimatePresence initial={false}>
+          {requests.map((j) => (
+            <RequestCard key={j.id} job={j} />
+          ))}
+        </AnimatePresence>
       </ul>
     </section>
   );

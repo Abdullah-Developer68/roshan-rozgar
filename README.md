@@ -60,7 +60,8 @@ drizzle/          SQL migrations
 |---|---|---|
 | OpenRouter | `nvidia/nemotron-3.5-super-vl:free` (primary), `google/gemma-4-31b-it:free`, `openrouter/free` (fallback chain) | Worker profile extraction, problem triage (text + **photo**), message translation + price detection, review summaries |
 | OpenRouter | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | Server-side speech-to-text, only when the browser has no speech recognition (e.g. Firefox). **Note:** OpenRouter rejects audio input unless the account holds ≥ $0.50 credit, so this path is inactive on a zero-balance key. |
-| Browser Web Speech API | device/browser engine (`ur-PK`, `en-US`) | Live speech-to-text (free & unlimited) |
+| **On-device Whisper** (transformers.js, ONNX, Web Worker) | `onnx-community/whisper-base` (q8, ~77 MB, downloaded once and cached; `NEXT_PUBLIC_WHISPER_MODEL=onnx-community/whisper-small` for better Urdu, ~250 MB) | Speech-to-text that works in **every** modern browser with no API key or credit. Used whenever the browser's own recognizer is missing or broken (Firefox, Brave, Chromium/Edge/Opera on Linux…) |
+| Browser Web Speech API | device/browser engine (`ur-PK`, `en-US`) | Fast live captions where it works (Chrome, Safari); detected and skipped for the session when it returns nothing |
 | Browser speechSynthesis | device voices (Urdu, else Hindi) | Read-aloud of prompts, profiles, job summaries and messages |
 
 **How AI is called.** Every task uses the Vercel AI SDK: `generateText({ model: openrouter.chat(id), output: Output.object({ schema }) })`, so the model is constrained by a JSON schema (OpenRouter `response_format: json_schema`) and the SDK validates the reply. Each task has a strict *wire* schema for the model and a lenient Zod *normaliser* (`src/server/ai/schemas.ts`); if a free model drifts from the schema, the raw reply is salvaged through the normaliser instead of failing, and providers without JSON-schema support are retried in JSON mode.
@@ -104,7 +105,7 @@ Environment variables (`.env.example`):
 ## Known limitations
 
 - Free OpenRouter models are rate-limited upstream and capped at 50 requests/day on this key; when exhausted, features degrade to the labelled rule-based fallbacks.
-- Speech recognition quality depends on the browser's Urdu engine; Punjabi/Pashto speakers are only partially supported (the LLM is told to interpret charitably).
+- Speech recognition: the first on-device transcription downloads the Whisper model (~77 MB, then cached). `whisper-base` is noticeably weaker on Urdu than on English; the LLM that reads the transcript is told to interpret it charitably, and `whisper-small` can be enabled for better Urdu at ~250 MB. Punjabi/Pashto are only partially supported.
 - Text-to-speech depends on installed device voices. Without an Urdu voice we use a Hindi voice with hand-written Devanagari prompts (dynamic text is transliterated approximately).
 - Availability is "right now" (online + not engaged). Scheduling for a later time slot is not modelled.
 - Real-time updates are polling-based (3–5 s), not websockets.
@@ -117,4 +118,4 @@ This project was built with **Claude Code (Anthropic, Claude Opus 5.5)** as an A
 
 ## Credits
 
-Next.js, React, Tailwind CSS, Drizzle ORM, postgres.js, Better Auth, Zod, Zustand, Leaflet, react-leaflet, lucide-react (all MIT/ISC/BSD-licensed open source). Map data © OpenStreetMap contributors. Fonts: Noto Nastaliq Urdu (SIL OFL), Geist (SIL OFL). AI via OpenRouter.
+Next.js, React, Tailwind CSS, shadcn/ui, Radix UI, Motion, Drizzle ORM, postgres.js, Better Auth, Zod, Zustand, Vercel AI SDK, transformers.js (Hugging Face), OpenAI Whisper weights (MIT, via onnx-community), Leaflet, react-leaflet, lucide-react (all MIT/ISC/BSD-licensed open source). Map data © OpenStreetMap contributors. Fonts: Noto Nastaliq Urdu (SIL OFL), Geist (SIL OFL). AI via OpenRouter.

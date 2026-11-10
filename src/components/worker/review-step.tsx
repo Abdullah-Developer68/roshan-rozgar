@@ -1,5 +1,6 @@
 "use client";
-import { Check, LocateFixed, Mic, Pencil } from "lucide-react";
+import { Banknote, CalendarDays, Check, LocateFixed, MapPin, Mic, Pencil, User, Wrench, type LucideIcon } from "lucide-react";
+import { TRADE_ICONS, TradeIcon } from "@/components/ui/icons";
 import type { ReactNode } from "react";
 import { useOnboardingStore, type FixField } from "@/stores/onboarding-store";
 import { MicButton } from "@/components/ui/mic-button";
@@ -11,6 +12,7 @@ import { TRADES, TRADE_LIST } from "@/lib/trades";
 import { AREAS, AREA_BY_ID } from "@/lib/areas";
 import { P, profileSentence } from "@/lib/phrases";
 import { useT } from "@/lib/i18n";
+import { SttStatus } from "@/components/ui/stt-status";
 
 function cleanName(text: string): string {
   return text
@@ -31,7 +33,7 @@ function FieldCard({
   children,
 }: {
   field: Exclude<FixField, null>;
-  icon: string;
+  icon: LucideIcon;
   label: string;
   value: ReactNode | null;
   speakUr: string | null;
@@ -42,11 +44,14 @@ function FieldCard({
   const setFixing = useOnboardingStore((s) => s.setFixing);
   const { t, pick } = useT();
   const open = fixing === field;
+  const Icon = icon;
   const missing = value == null;
   return (
     <div className={`rounded-xl bg-card shadow-sm ring-1 ${missing ? "ring-2 ring-red-300" : "ring-line"}`}>
       <div className="flex items-center gap-3 p-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-bg text-2xl" aria-hidden>{icon}</span>
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted" aria-hidden>
+          <Icon className="size-6" strokeWidth={1.6} />
+        </span>
         <button className="flex min-w-0 flex-1 flex-col items-start text-start" onClick={() => setFixing(open ? null : field)}>
           <span className="text-sm text-muted-foreground">{label}</span>
           <span className="w-full truncate text-xl font-bold">
@@ -73,6 +78,7 @@ function NameFix() {
   const name = useOnboardingStore((s) => s.draft.name);
   const { t } = useT();
   return (
+    <div className="flex flex-col gap-2">
     <div className="flex items-center gap-3">
       <MicButton
         id="fix-name"
@@ -93,6 +99,8 @@ function NameFix() {
         className="min-w-0 flex-1 rounded-lg bg-bg px-3 py-3 text-lg outline-none border border-border"
       />
     </div>
+    <SttStatus ownerId="fix-name" />
+    </div>
   );
 }
 
@@ -112,7 +120,7 @@ function TradeFix() {
           }}
           className={`flex flex-col items-center rounded-lg p-2 ${trade === tr.id ? "bg-brand text-white" : "bg-bg"}`}
         >
-          <span className="text-3xl" aria-hidden>{tr.emoji}</span>
+          <TradeIcon trade={tr.id} className="size-7" />
           <span className="text-xs">{pick(tr.en, tr.ur)}</span>
         </button>
       ))}
@@ -217,7 +225,7 @@ export function ReviewStep() {
 
       <FieldCard
         field="name"
-        icon="👤"
+        icon={User}
         label={t("name")}
         value={displayName || null}
         speakUr={displayName ? `آپ کا نام ${displayName} ہے` : null}
@@ -227,7 +235,7 @@ export function ReviewStep() {
       </FieldCard>
       <FieldCard
         field="trade"
-        icon={trade?.emoji ?? "🔧"}
+        icon={trade ? TRADE_ICONS[trade.id] : Wrench}
         label={t("work")}
         value={trade ? pick(trade.en, trade.ur) : null}
         speakUr={trade ? `آپ کا کام ${trade.ur} ہے` : null}
@@ -237,7 +245,7 @@ export function ReviewStep() {
       </FieldCard>
       <FieldCard
         field="experience"
-        icon="📅"
+        icon={CalendarDays}
         label={t("experience")}
         value={draft.experienceYears != null ? `${draft.experienceYears} ${t("years")}` : null}
         speakUr={draft.experienceYears != null ? `${draft.experienceYears} سال کا تجربہ` : null}
@@ -247,7 +255,7 @@ export function ReviewStep() {
       </FieldCard>
       <FieldCard
         field="area"
-        icon="📍"
+        icon={MapPin}
         label={t("area")}
         value={area ? (lang === "ur" ? `${area.ur} · ${area.en}` : `${area.en}, ${area.city}`) : null}
         speakUr={area ? `علاقہ ${area.ur}` : null}
@@ -257,7 +265,7 @@ export function ReviewStep() {
       </FieldCard>
       <FieldCard
         field="charge"
-        icon="💰"
+        icon={Banknote}
         label={t("visitFee")}
         value={draft.visitCharge != null ? <span dir="ltr">Rs {draft.visitCharge.toLocaleString("en-PK")}</span> : null}
         speakUr={draft.visitCharge != null ? `آنے کی فیس ${draft.visitCharge} روپے` : null}

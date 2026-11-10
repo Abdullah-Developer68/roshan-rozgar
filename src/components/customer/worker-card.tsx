@@ -1,5 +1,7 @@
 "use client";
-import { BadgeCheck, Clock, MapPin } from "lucide-react";
+import { BadgeCheck, Check, Clock, MapPin, Star } from "lucide-react";
+import { motion } from "motion/react";
+import { listItem } from "@/components/ui/motion";
 import Link from "next/link";
 import { useRequestStore } from "@/stores/request-store";
 import { Avatar } from "@/components/ui/avatar";
@@ -28,18 +30,21 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
 
   if (!available)
     return (
-      <li className="flex items-center gap-3 rounded-lg bg-white/60 p-3 opacity-70 border border-border">
+      <motion.li layout {...listItem} className="flex items-center gap-3 rounded-lg border border-border bg-card/60 p-3 opacity-70">
         <Avatar name={w.name} photoUrl={w.photoUrl} size="size-10" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{pick(w.name, w.nameUr)}</p>
-          <p className="text-xs text-muted-foreground" dir="ltr">{w.distanceKm} km · ★ {w.ratingAvg.toFixed(1)}</p>
+          <p className="flex items-center gap-1 text-xs text-muted-foreground" dir="ltr">{w.distanceKm} km · <Star className="size-3 fill-current" /> {w.ratingAvg.toFixed(1)}</p>
         </div>
         <StatusPill value={w.availability} />
-      </li>
+      </motion.li>
     );
 
   return (
-    <li
+    <motion.li
+      layout
+      {...listItem}
+      whileHover={{ y: -2 }}
       onMouseEnter={() => setFocused(w.id)}
       className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 transition ${selected ? "ring-2 ring-brand" : focused ? "ring-brand/40" : "ring-line"}`}
     >
@@ -95,9 +100,15 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
           aria-pressed={selected}
           className={`ms-auto h-10 rounded-lg px-4 text-sm font-semibold ${selected ? "bg-brand text-white" : "bg-brand/10 text-brand"}`}
         >
-          {selected ? t("selected") : t("select")}
+          {selected ? (
+            <span className="inline-flex items-center gap-1">
+              <Check className="size-4" /> {t("selected")}
+            </span>
+          ) : (
+            t("select")
+          )}
         </button>
       </div>
-    </li>
+    </motion.li>
   );
 }

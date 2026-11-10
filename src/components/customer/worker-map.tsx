@@ -4,15 +4,20 @@ import L from "leaflet";
 import { useEffect } from "react";
 import { Circle, MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 import { useRequestStore } from "@/stores/request-store";
-import { TRADES } from "@/lib/trades";
+import { renderToStaticMarkup } from "react-dom/server";
+import type { TradeId } from "@/lib/trades";
+import { TradeIcon } from "@/components/ui/icons";
+import { Star } from "lucide-react";
 import { useT, type MsgKey } from "@/lib/i18n";
 
-function pin(emoji: string, color: string, ring: boolean) {
+const iconSvg = (trade: TradeId) => renderToStaticMarkup(<TradeIcon trade={trade} className="size-4" strokeWidth={2} />);
+
+function pin(trade: TradeId, color: string, ring: boolean) {
   return L.divIcon({
     className: "",
     iconSize: [34, 34],
     iconAnchor: [17, 17],
-    html: `<div style="width:34px;height:34px;border-radius:999px;background:${color};display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 6px rgba(0,0,0,.3);border:3px solid ${ring ? "#0b5d3b" : "white"}">${emoji}</div>`,
+    html: `<div style="width:34px;height:34px;border-radius:999px;background:${color};display:flex;align-items:center;justify-content:center;color:#0a0a0a;box-shadow:0 2px 6px rgba(0,0,0,.25);border:2px solid ${ring ? "#0a0a0a" : "white"}">${iconSvg(trade)}</div>`,
   });
 }
 
@@ -64,7 +69,7 @@ export function WorkerMap() {
             <Marker
               key={w.id}
               position={[w.lat, w.lng]}
-              icon={pin(TRADES[w.trade].emoji, color, selected.includes(w.id))}
+              icon={pin(w.trade, color, selected.includes(w.id))}
               opacity={w.availability === "available" ? 1 : 0.55}
               eventHandlers={{
                 click: () => w.availability === "available" && toggle(w.id),
@@ -72,7 +77,9 @@ export function WorkerMap() {
               }}
             >
               <Tooltip>
-                {pick(w.name, w.nameUr)} · ★{w.ratingAvg.toFixed(1)} · {w.distanceKm} km · {t(avail[w.availability])}
+                <span className="inline-flex items-center gap-1">
+                  {pick(w.name, w.nameUr)} · <Star className="size-3 fill-current" /> {w.ratingAvg.toFixed(1)} · {w.distanceKm} km · {t(avail[w.availability])}
+                </span>
               </Tooltip>
             </Marker>
           );

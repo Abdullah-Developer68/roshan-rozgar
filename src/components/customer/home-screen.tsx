@@ -14,6 +14,11 @@ import { AREAS, AREA_BY_ID } from "@/lib/areas";
 import { TRADE_LIST, TRADES } from "@/lib/trades";
 import { formatPkr } from "@/lib/geo";
 import { Button } from "@/components/ui/button";
+import { SttStatus } from "@/components/ui/stt-status";
+import { TradeIcon } from "@/components/ui/icons";
+import { Mic } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { ease, spring } from "@/components/ui/motion";
 import { useT } from "@/lib/i18n";
 
 const WorkerMap = dynamic(() => import("@/components/customer/worker-map").then((m) => m.WorkerMap), {
@@ -46,7 +51,7 @@ function ProblemInput() {
         <div className="flex flex-col items-center gap-1">
           <MicButton id="problem" size="md" onDone={(r) => r.text && setText(`${text} ${r.text}`.trim())} />
           <button onClick={() => setSttLang(sttLang === "ur-PK" ? "en-US" : "ur-PK")} className="text-[11px] font-semibold text-muted-foreground underline">
-            🎤 {sttLang === "ur-PK" ? "اردو" : "English"}
+            <Mic className="inline size-3" /> {sttLang === "ur-PK" ? "اردو" : "English"}
           </button>
         </div>
         <textarea
@@ -58,6 +63,7 @@ function ProblemInput() {
           className="min-w-0 flex-1 resize-none rounded-lg bg-bg p-3 outline-none border border-border focus:ring-2 focus:ring-brand"
         />
       </div>
+      <SttStatus ownerId="problem" />
       <div className="flex items-center gap-3">
         <label className="flex cursor-pointer items-center gap-2 rounded-full bg-bg px-4 py-2 text-sm font-semibold border border-border">
           {uploading ? <Spinner className="size-4" /> : <Camera className="size-4" />} {photo ? t("changePhoto") : t("addPhoto")}
@@ -142,10 +148,22 @@ function TriageCard() {
   const tipEn = triage.safetyTipEn;
   const tip = pick(triage.safetyTipEn, triage.safetyTipUr);
   return (
-    <section className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm border border-border">
+    <motion.section
+      key={triage.summaryEn}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease }}
+      className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm border border-border"
+    >
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold">
-          {trade ? t("youNeed", { trade: `${TRADES[trade].emoji} ${pick(TRADES[trade].en, TRADES[trade].ur)}` }) : t("whichWorker")}
+          {trade ? (
+            <span className="inline-flex items-center gap-1.5">
+              {t("youNeed", { trade: "" })} <TradeIcon trade={trade} className="size-4" /> {pick(TRADES[trade].en, TRADES[trade].ur)}
+            </span>
+          ) : (
+            t("whichWorker")
+          )}
         </h2>
         <AiBadge source={source} />
       </div>
@@ -191,11 +209,11 @@ function TriageCard() {
             onClick={() => setTrade(tr.id)}
             className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${trade === tr.id ? "bg-brand text-white" : "bg-bg border border-border"}`}
           >
-            {tr.emoji} {pick(tr.en, tr.ur)}
+            <TradeIcon trade={tr.id} className="me-1 inline size-3.5" /> {pick(tr.en, tr.ur)}
           </button>
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 }
 
@@ -238,17 +256,21 @@ function Results() {
           <p className="rounded-lg bg-card p-4 text-sm border border-border">{t("noneFree")}</p>
         )}
         <ul className="flex flex-col gap-3">
-          {available.map((w) => (
-            <WorkerCard key={w.id} worker={w} />
-          ))}
+          <AnimatePresence initial={false} mode="popLayout">
+            {available.map((w) => (
+              <WorkerCard key={w.id} worker={w} />
+            ))}
+          </AnimatePresence>
         </ul>
         {unavailable.length > 0 && (
           <>
             <h3 className="mt-2 text-sm font-semibold text-muted-foreground">{t("busyOffline", { n: unavailable.length })}</h3>
             <ul className="flex flex-col gap-2">
-              {unavailable.map((w) => (
-                <WorkerCard key={w.id} worker={w} />
-              ))}
+              <AnimatePresence initial={false} mode="popLayout">
+                {unavailable.map((w) => (
+                  <WorkerCard key={w.id} worker={w} />
+                ))}
+              </AnimatePresence>
             </ul>
           </>
         )}
@@ -266,9 +288,18 @@ function SendBar() {
   const reset = useRequestStore((s) => s.reset);
   const router = useRouter();
   const { t, dir, langClass } = useT();
-  if (!selected.length) return null;
   return (
-    <div dir={dir} className={`fixed inset-x-0 bottom-0 z-[500] ${langClass} border-t border-line bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur`}>
+    <AnimatePresence>
+    {selected.length > 0 && (
+    <motion.div
+      key="sendbar"
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={spring}
+      dir={dir}
+      className={`fixed inset-x-0 bottom-0 z-[500] ${langClass} border-t border-border bg-card/95 px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur`}
+    >
       <div className="mx-auto flex max-w-5xl flex-col gap-2 sm:flex-row sm:items-center">
         <div className="sm:w-72">
           <p className="text-xs font-semibold text-muted-foreground">{t("openingOffer")}</p>
@@ -288,7 +319,9 @@ function SendBar() {
           {sending ? <Spinner /> : t("sendRequest", { n: selected.length }).replace("(s)", selected.length > 1 ? "s" : "")}
         </button>
       </div>
-    </div>
+    </motion.div>
+    )}
+    </AnimatePresence>
   );
 }
 

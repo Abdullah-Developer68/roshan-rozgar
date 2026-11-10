@@ -17,7 +17,6 @@ export type Trade = {
   ur: string;
   /** Devanagari reading of the Urdu word, used only for text-to-speech fallback voices. */
   hi: string;
-  emoji: string;
   /** Tailwind classes for the trade's colour chip. */
   chip: string;
   /** Typical visit/job price band in PKR, used as a prior when no job history exists. */
@@ -32,7 +31,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Electrician",
     ur: "الیکٹریشن",
     hi: "बिजली वाला",
-    emoji: "⚡",
     chip: "bg-yellow-100 text-yellow-900",
     priceBand: [500, 3000],
     keywords: [
@@ -46,7 +44,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Plumber",
     ur: "پلمبر",
     hi: "प्लंबर",
-    emoji: "🚰",
     chip: "bg-sky-100 text-sky-900",
     priceBand: [500, 4000],
     keywords: [
@@ -60,7 +57,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "AC Technician",
     ur: "اے سی مکینک",
     hi: "ए सी मिस्त्री",
-    emoji: "❄️",
     chip: "bg-cyan-100 text-cyan-900",
     priceBand: [1500, 6000],
     keywords: [
@@ -73,7 +69,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Carpenter",
     ur: "ترکھان",
     hi: "तरखान",
-    emoji: "🪚",
     chip: "bg-amber-100 text-amber-900",
     priceBand: [800, 5000],
     keywords: [
@@ -87,7 +82,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Mechanic",
     ur: "مکینک",
     hi: "मिस्त्री",
-    emoji: "🔧",
     chip: "bg-zinc-200 text-zinc-900",
     priceBand: [500, 5000],
     keywords: [
@@ -101,7 +95,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Painter",
     ur: "پینٹر",
     hi: "पेंटर",
-    emoji: "🎨",
     chip: "bg-pink-100 text-pink-900",
     priceBand: [1500, 15000],
     keywords: [
@@ -114,7 +107,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Mason",
     ur: "راج مستری",
     hi: "राज मिस्त्री",
-    emoji: "🧱",
     chip: "bg-orange-100 text-orange-900",
     priceBand: [1500, 8000],
     keywords: [
@@ -127,7 +119,6 @@ export const TRADES: Record<TradeId, Trade> = {
     en: "Welder",
     ur: "ویلڈر",
     hi: "वेल्डर",
-    emoji: "🔥",
     chip: "bg-red-100 text-red-900",
     priceBand: [800, 6000],
     keywords: [

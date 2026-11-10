@@ -4,6 +4,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { LangSync } from "@/components/shared/lang-sync";
+import { MotionProvider } from "@/components/ui/motion";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const nastaliq = Noto_Nastaliq_Urdu({
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geist.variable} ${nastaliq.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        {children}
+        <MotionProvider>{children}</MotionProvider>
         <Suspense fallback={null}>
           <Toaster />
           <LangSync />

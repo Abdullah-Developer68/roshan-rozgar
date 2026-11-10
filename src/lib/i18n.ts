@@ -158,7 +158,7 @@ const M = {
   hearThem: { en: "Hear them", ur: "آواز سنیں" },
   profileReviews: { en: "Profile & reviews", ur: "پروفائل اور ریویو" },
   select: { en: "Select", ur: "منتخب کریں" },
-  selected: { en: "✓ Selected", ur: "✓ منتخب" },
+  selected: { en: "Selected", ur: "منتخب" },
   verifiedReviews: { en: "({n} verified reviews)", ur: "({n} تصدیق شدہ ریویو)" },
   statJobs: { en: "Jobs done here", ur: "یہاں مکمل کام" },
   statExp: { en: "Experience", ur: "تجربہ" },
@@ -204,7 +204,7 @@ const M = {
   routeToYou: { en: "Worker's route to you", ur: "کاریگر کا آپ تک راستہ" },
   workersPrice: { en: "Worker's price", ur: "کاریگر کی قیمت" },
   customersOffer: { en: "Customer's offer", ur: "گاہک کی پیشکش" },
-  offerAccepted: { en: "✅ Accepted", ur: "✅ منظور" },
+  offerAccepted: { en: "Accepted", ur: "منظور" },
   offerReplaced: { en: "Replaced", ur: "بدل دی گئی" },
   offerWaiting: { en: "Waiting for reply", ur: "جواب کا انتظار" },
   offerNew: { en: "New price", ur: "نئی قیمت" },
@@ -261,7 +261,7 @@ const M = {
   makeProfile: { en: "Make profile", ur: "پروفائل بنائیں" },
   aiBuilding: { en: "AI is turning your words into a profile", ur: "AI آپ کی باتوں سے پروفائل بنا رہا ہے" },
   profileTitle: { en: "Your profile", ur: "آپ کی پروفائل" },
-  profileSub: { en: "Check each box · tap ✏️ to fix", ur: "ہر خانہ دیکھیں · ٹھیک کرنے کے لیے ✏️ دبائیں" },
+  profileSub: { en: "Check each box · tap the pencil to fix", ur: "ہر خانہ دیکھیں · ٹھیک کرنے کے لیے پنسل دبائیں" },
   readProfile: { en: "Read my profile", ur: "میری پروفائل سنائیں" },
   edit: { en: "Edit", ur: "بدلیں" },
   name: { en: "Name", ur: "نام" },
@@ -341,6 +341,13 @@ const M = {
   previewWorkerEn: { en: "Gas is low and the drain pipe is blocked. It will cost Rs 2,000.", ur: "گیس کم ہے اور پانی کا پائپ بند ہے۔ دو ہزار روپے لگیں گے۔" },
   previewTested: { en: "Voice note transcribed & translated", ur: "آواز لکھی اور ترجمہ ہوئی" },
   previewJobs: { en: "Jobs", ur: "کام" },
+
+  // on-device speech recognition
+  sttDownloading: { en: "Preparing voice typing on this device… {p}%", ur: "اس فون پر آواز سے لکھنے کی تیاری… {p}%" },
+  sttOneTime: { en: "one-time {mb} MB download", ur: "صرف پہلی بار {mb} MB" },
+  sttTranscribing: { en: "Turning your voice into text…", ur: "آپ کی آواز کو لکھا جا رہا ہے…" },
+  sttServer: { en: "Transcribing on the server…", ur: "سرور پر لکھا جا رہا ہے…" },
+  sttModelError: { en: "Voice typing couldn't load. Check your connection and try again.", ur: "آواز سے لکھنا شروع نہیں ہو سکا۔ انٹرنیٹ دیکھ کر دوبارہ کوشش کریں۔" },
 } as const;
 
 export type MsgKey = keyof typeof M;

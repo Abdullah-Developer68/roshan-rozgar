@@ -20,6 +20,9 @@ import { SiteFooter } from "@/components/shared/site-footer";
 import { LogoMark } from "@/components/shared/logo";
 import { useT, type MsgKey } from "@/lib/i18n";
 import { TRADE_LIST } from "@/lib/trades";
+import { TradeIcon } from "@/components/ui/icons";
+import { motion } from "motion/react";
+import { Reveal, Stagger, StaggerItem, ease } from "@/components/ui/motion";
 
 const FEATURES: { icon: typeof Mic; title: MsgKey; text: MsgKey }[] = [
   { icon: Mic, title: "step1T", text: "step1" },
@@ -47,7 +50,12 @@ function ProductPreview() {
       <div className="absolute -end-2 top-24 h-40 w-24 rounded-md bg-[linear-gradient(160deg,#c9d3d6,#e9ecec)] opacity-80" />
       <div className="absolute -bottom-6 start-24 h-16 w-48 rounded-md bg-[linear-gradient(120deg,#dfe7ee,#f3f5f7)] opacity-90" />
 
-      <div className="surface relative grid overflow-hidden shadow-[0_24px_60px_-24px_rgba(10,10,10,0.25)] sm:grid-cols-[180px_1fr]">
+      <motion.div
+        initial={{ opacity: 0, y: 40, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease, delay: 0.25 }}
+        className="surface relative grid overflow-hidden shadow-[0_24px_60px_-24px_rgba(10,10,10,0.25)] sm:grid-cols-[180px_1fr]"
+      >
         {/* sidebar */}
         <div className="hidden flex-col gap-1 border-e border-border bg-muted/40 p-3 text-[12px] sm:flex">
           <div className="mb-2 flex gap-1.5">
@@ -58,7 +66,7 @@ function ProductPreview() {
           <p className="eyebrow mb-1">{t("previewJobs")}</p>
           {TRADE_LIST.slice(0, 6).map((tr, i) => (
             <div key={tr.id} className={`flex items-center gap-2 rounded-md px-2 py-1 ${i === 2 ? "bg-card font-medium shadow-sm" : "text-muted-foreground"}`}>
-              <span>{tr.emoji}</span>
+              <TradeIcon trade={tr.id} className="size-3.5" />
               <span className="truncate">{pick(tr.en, tr.ur)}</span>
               {i < 3 && <span className="ms-auto size-1.5 rounded-full bg-info" />}
             </div>
@@ -68,7 +76,7 @@ function ProductPreview() {
         {/* thread */}
         <div className="flex min-h-[340px] flex-col gap-3 p-4 text-[13px]">
           <div className="flex items-center gap-2 border-b border-border pb-3">
-            <span className="text-base">❄️</span>
+            <TradeIcon trade="ac_technician" className="size-4" />
             <span className="font-medium">{pick("AC not cooling · G-9", "اے سی ٹھنڈا نہیں · جی نائن")}</span>
             <span className="ms-auto rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{t("jobStatus_requested")}</span>
           </div>
@@ -98,10 +106,15 @@ function ProductPreview() {
             </span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* floating worker card */}
-      <div className="surface absolute -bottom-10 end-0 hidden w-72 p-4 shadow-[0_24px_60px_-24px_rgba(10,10,10,0.3)] md:block">
+      <motion.div
+        initial={{ opacity: 0, y: 30, x: 20 }}
+        animate={{ opacity: 1, y: [0, -6, 0], x: 0 }}
+        transition={{ opacity: { duration: 0.6, delay: 0.7 }, x: { duration: 0.6, delay: 0.7, ease }, y: { duration: 5, delay: 1.3, repeat: Infinity, ease: "easeInOut" } }}
+        className="surface absolute -bottom-10 end-0 hidden w-72 p-4 shadow-[0_24px_60px_-24px_rgba(10,10,10,0.3)] md:block"
+      >
         <p className="flex items-center gap-1.5 text-[11px] font-medium text-ok">
           <span className="size-1.5 rounded-full bg-ok" /> {t("statusAvailable")}
         </p>
@@ -119,7 +132,7 @@ function ProductPreview() {
             <span key={x} className="rounded-full border border-border px-2 py-0.5 text-[11px]">{x}</span>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -133,9 +146,14 @@ export function LandingScreen() {
       <main className="flex flex-1 flex-col">
         {/* Hero */}
         <section className="mx-auto w-full max-w-6xl px-4 pb-24 pt-16 sm:pt-24">
-          <h1 className="display max-w-3xl text-[2.6rem] sm:text-6xl">{t("heroTitle")}</h1>
-          <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground">{t("heroSub")}</p>
-          <div className="mt-7 flex flex-wrap gap-2">
+          <Stagger gap={0.09}>
+          <StaggerItem>
+            <h1 className="display max-w-3xl text-[2.6rem] sm:text-6xl">{t("heroTitle")}</h1>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground">{t("heroSub")}</p>
+          </StaggerItem>
+          <StaggerItem className="mt-7 flex flex-wrap gap-2">
             <Button asChild size="lg" className="h-11 rounded-lg px-5">
               <Link href="/customer">
                 {t("findWorkers")} <ArrowRight className="rtl:rotate-180" />
@@ -146,7 +164,8 @@ export function LandingScreen() {
                 <Mic /> {t("heroJoin")}
               </Link>
             </Button>
-          </div>
+          </StaggerItem>
+          </Stagger>
           <ProductPreview />
         </section>
 
@@ -157,7 +176,7 @@ export function LandingScreen() {
             <ul className="grid grid-cols-4 gap-y-5 text-muted-foreground sm:grid-cols-8">
               {TRADE_LIST.map((tr) => (
                 <li key={tr.id} className="flex flex-col items-center gap-1 grayscale">
-                  <span className="text-2xl opacity-80">{tr.emoji}</span>
+                  <TradeIcon trade={tr.id} className="size-6" strokeWidth={1.5} />
                   <span className="text-[13px] font-medium tracking-tight">{pick(tr.en, tr.ur)}</span>
                 </li>
               ))}
@@ -168,46 +187,50 @@ export function LandingScreen() {
         {/* How it works: hairline grid */}
         <section id="how" className="section-rule scroll-mt-16">
           <div className="frame px-4 py-16 sm:px-8">
-            <h2 className="display text-3xl sm:text-[2.6rem]">
-              {t("featA")} <span className="display-faint block">{t("featB")}</span>
-            </h2>
-            <div className="mt-10 grid border-s border-t border-hairline sm:grid-cols-2 lg:grid-cols-5">
+            <Reveal>
+              <h2 className="display text-3xl sm:text-[2.6rem]">
+                {t("featA")} <span className="display-faint block">{t("featB")}</span>
+              </h2>
+            </Reveal>
+            <Stagger inView gap={0.07} className="mt-10 grid border-s border-t border-hairline sm:grid-cols-2 lg:grid-cols-5">
               {FEATURES.map((f, i) => (
-                <div key={f.title} className="flex flex-col gap-3 border-e border-b border-hairline p-5">
+                <StaggerItem key={f.title} className="flex flex-col gap-3 border-e border-b border-hairline p-5 transition-colors hover:bg-card">
                   <span className="text-[11px] text-faint tabular-nums" dir="ltr">0{i + 1}</span>
                   <f.icon className="size-5" strokeWidth={1.6} />
                   <h3 className="text-[15px] font-medium">{t(f.title)}</h3>
                   <p className="text-[13px] leading-relaxed text-muted-foreground">{t(f.text)}</p>
-                </div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </section>
 
         {/* Trust: mirrors the reference "enterprise security" block */}
         <section id="trust" className="section-rule scroll-mt-16">
           <div className="frame grid gap-10 px-4 py-16 sm:px-8 lg:grid-cols-[1fr_2fr]">
-            <h2 className="display text-3xl sm:text-[2.2rem]">
-              {t("trustA")} <span className="display-faint block">{t("trustB")}</span>
-            </h2>
+            <Reveal>
+              <h2 className="display text-3xl sm:text-[2.2rem]">
+                {t("trustA")} <span className="display-faint block">{t("trustB")}</span>
+              </h2>
+            </Reveal>
             <div>
-              <div className="grid grid-cols-3 border-s border-hairline">
+              <Stagger inView gap={0.1} className="grid grid-cols-3 border-s border-hairline">
                 {EMBLEMS.map((e) => (
-                  <div key={e.key} className="flex flex-col items-center gap-3 border-e border-hairline px-2 py-6 text-center">
+                  <StaggerItem key={e.key} className="flex flex-col items-center gap-3 border-e border-hairline px-2 py-6 text-center">
                     <span className="flex size-16 items-center justify-center rounded-full border border-border text-muted-foreground">
                       <e.icon className="size-7" strokeWidth={1.4} />
                     </span>
                     <span className="text-[12px] text-muted-foreground">{t(e.key)}</span>
-                  </div>
+                  </StaggerItem>
                 ))}
-              </div>
-              <ul className="mt-6 grid gap-x-8 sm:grid-cols-2">
+              </Stagger>
+              <Reveal delay={0.15} className="mt-6 grid gap-x-8 sm:grid-cols-2">
                 {TRUST.map((k) => (
-                  <li key={k} className="border-b border-hairline py-3 text-[13px] text-muted-foreground">
+                  <p key={k} className="border-b border-hairline py-3 text-[13px] text-muted-foreground">
                     {t(k)}
-                  </li>
+                  </p>
                 ))}
-              </ul>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -242,7 +265,7 @@ export function LandingScreen() {
 
         {/* Closing CTA */}
         <section className="section-rule">
-          <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 py-28 text-center">
+          <Reveal className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 py-28 text-center">
             <LogoMark className="mb-6 size-8" />
             <h2 className="display text-4xl sm:text-5xl">
               <span className="display-faint block">{t("ctaA")}</span>
@@ -256,7 +279,7 @@ export function LandingScreen() {
                 <Link href="/worker/join">{t("heroJoin")}</Link>
               </Button>
             </div>
-          </div>
+          </Reveal>
         </section>
       </main>
 
