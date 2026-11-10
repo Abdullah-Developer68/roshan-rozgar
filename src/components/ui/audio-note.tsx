@@ -17,12 +17,12 @@ export function AudioNote({ src, label, tone = "light" }: { src: string; label?:
           if (a.paused) void a.play();
           else a.pause();
         }}
-        className={`flex size-9 items-center justify-center rounded-full ${tone === "dark" ? "bg-white text-brand" : "bg-brand text-white"}`}
+        className={`flex size-9 items-center justify-center rounded-full ${tone === "dark" ? "bg-card text-brand" : "bg-brand text-white"}`}
       >
         {playing ? <Pause className="size-4" /> : <Play className="size-4 translate-x-px" />}
       </button>
       <div className={`h-1.5 w-24 overflow-hidden rounded-full ${tone === "dark" ? "bg-white/30" : "bg-black/10"}`}>
-        <div className={`h-full ${tone === "dark" ? "bg-white" : "bg-brand"}`} style={{ width: `${progress * 100}%` }} />
+        <div className={`h-full ${tone === "dark" ? "bg-card" : "bg-brand"}`} style={{ width: `${progress * 100}%` }} />
       </div>
       {label && <span className="pr-2 text-xs opacity-80">{label}</span>}
       <audio

@@ -43,7 +43,7 @@ export function SpeakButton({
         if (!ok) toast.info("This device has no voice for this language", "اس فون میں اردو آواز موجود نہیں");
         else setOn(true);
       }}
-      className={`inline-flex ${dim} shrink-0 items-center justify-center rounded-full ${on ? "bg-sun text-white" : "bg-sun-soft text-amber-700"} ring-1 ring-amber-200 transition active:scale-95 ${className}`}
+      className={`inline-flex ${dim} shrink-0 items-center justify-center rounded-full ${on ? "bg-sun text-white" : "bg-sun-soft text-foreground"} ring-1 ring-border transition active:scale-95 ${className}`}
     >
       <Volume2 className={`${icon} ${on ? "animate-pulse" : ""}`} />
     </button>

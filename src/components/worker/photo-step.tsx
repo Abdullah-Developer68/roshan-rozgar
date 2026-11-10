@@ -32,12 +32,12 @@ export function PhotoStep() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{t("photoTitle")}</h1>
-          <p className="text-xs text-muted">{t("photoSub")}</p>
+          <p className="text-xs text-muted-foreground">{t("photoSub")}</p>
         </div>
         <SpeakButton ur={P.photo.ur} hi={P.photo.hi} en={P.photo.en} size="lg" />
       </div>
 
-      <label className="relative mx-auto flex size-56 cursor-pointer items-center justify-center overflow-hidden rounded-[2.5rem] bg-white shadow-sm ring-2 ring-dashed ring-brand/40 active:scale-[0.98]">
+      <label className="relative mx-auto flex size-56 cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-card shadow-sm ring-2 ring-dashed ring-brand/40 active:scale-[0.98]">
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt={t("photoTitle")} className="size-full object-cover" />
@@ -64,13 +64,13 @@ export function PhotoStep() {
         />
       </label>
 
-      {error && <p className="rounded-2xl bg-red-50 p-3 text-center text-sm text-red-800">{error}</p>}
+      {error && <p className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-800">{error}</p>}
 
       <div className="mt-auto flex flex-col gap-2">
         <button
           onClick={() => void finish()}
           disabled={saving || uploading}
-          className="flex h-20 items-center justify-center gap-3 rounded-3xl bg-ok text-white shadow-lg active:scale-[0.98] disabled:opacity-60"
+          className="flex h-20 items-center justify-center gap-3 rounded-xl bg-ok text-white shadow-sm active:scale-[0.98] disabled:opacity-60"
         >
           {saving ? <Spinner className="size-9" /> : <Check className="size-10" strokeWidth={3} />}
           <span className="text-2xl font-bold">{preview ? t("finishProfile") : t("skipPhoto")}</span>

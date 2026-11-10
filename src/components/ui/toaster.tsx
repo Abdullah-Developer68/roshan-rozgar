@@ -13,8 +13,8 @@ export function Toaster() {
         <button
           key={t.id}
           onClick={() => dismiss(t.id)}
-          className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-2xl px-4 py-3 text-left shadow-lg ring-1 ring-black/5 ${
-            t.kind === "error" ? "bg-red-50 text-red-900" : t.kind === "success" ? "bg-emerald-50 text-emerald-900" : "bg-white text-ink"
+          className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg px-4 py-3 text-left shadow-lg border border-border ${
+            t.kind === "error" ? "bg-red-50 text-red-900" : t.kind === "success" ? "bg-emerald-50 text-emerald-900" : "bg-card text-ink"
           }`}
         >
           {t.kind === "error" ? <XCircle className="mt-0.5 size-5 shrink-0" /> : t.kind === "success" ? <CheckCircle2 className="mt-0.5 size-5 shrink-0" /> : <Info className="mt-0.5 size-5 shrink-0" />}

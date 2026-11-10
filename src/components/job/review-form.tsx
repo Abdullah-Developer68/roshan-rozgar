@@ -27,7 +27,7 @@ export function ReviewForm() {
           key={String(v)}
           type="button"
           onClick={() => set(v)}
-          className={`rounded-full px-4 py-1.5 text-sm font-semibold ${value === v ? (v ? "bg-ok text-white" : "bg-danger text-white") : "bg-white ring-1 ring-line"}`}
+          className={`rounded-full px-4 py-1.5 text-sm font-semibold ${value === v ? (v ? "bg-ok text-white" : "bg-danger text-white") : "bg-card border border-border"}`}
         >
           {v ? t("yes") : t("no")}
         </button>
@@ -37,14 +37,14 @@ export function ReviewForm() {
 
   return (
     <form
-      className="flex flex-col gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line"
+      className="flex flex-col gap-4 rounded-xl bg-card p-4 shadow-sm border border-border"
       onSubmit={(e) => {
         e.preventDefault();
         if (!rating) return;
         void review({ rating, tags, paidAgreedPrice: paid, wouldHireAgain: again, comment: comment.trim() || null });
       }}
     >
-      <h3 className="font-bold">{t("howWas", { name: job.worker.name })}</h3>
+      <h3 className="font-semibold">{t("howWas", { name: job.worker.name })}</h3>
       <div className="flex justify-center gap-1">
         {[1, 2, 3, 4, 5].map((i) => (
           <button key={i} type="button" aria-label={`${i} stars`} onClick={() => setRating(i)}>
@@ -60,7 +60,7 @@ export function ReviewForm() {
               key={tag.id}
               type="button"
               onClick={() => setTags(on ? tags.filter((x) => x !== tag.id) : [...tags, tag.id])}
-              className={`rounded-full px-3 py-1.5 text-sm ${on ? "bg-brand text-white" : "bg-bg ring-1 ring-line"}`}
+              className={`rounded-full px-3 py-1.5 text-sm ${on ? "bg-brand text-white" : "bg-bg border border-border"}`}
             >
               {tag.emoji} {pick(tag.id, tag.ur)}
             </button>
@@ -83,13 +83,13 @@ export function ReviewForm() {
           rows={2}
           dir="auto"
           placeholder={t("reviewPh")}
-          className="min-w-0 flex-1 rounded-2xl bg-bg p-3 outline-none ring-1 ring-line"
+          className="min-w-0 flex-1 rounded-lg bg-bg p-3 outline-none border border-border"
         />
       </div>
-      <button disabled={!rating || acting} className="flex h-12 items-center justify-center rounded-2xl bg-brand font-bold text-white disabled:opacity-50">
+      <button disabled={!rating || acting} className="flex h-12 items-center justify-center rounded-lg bg-brand font-semibold text-white disabled:opacity-50">
         {acting ? <Spinner /> : t("submitReview")}
       </button>
-      <p className="text-center text-xs text-muted">{t("reviewNote")}</p>
+      <p className="text-center text-xs text-muted-foreground">{t("reviewNote")}</p>
     </form>
   );
 }

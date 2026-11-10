@@ -7,7 +7,9 @@ import { useSessionStore } from "@/stores/session-store";
 import { CustomerLogin } from "@/components/auth/customer-login";
 import { CustomerName } from "@/components/auth/customer-name";
 import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
 import { LangToggle } from "@/components/ui/lang-toggle";
+import { Logo } from "@/components/shared/logo";
 import { useT } from "@/lib/i18n";
 
 /** Customer frame + auth gate. Children render only for a signed-in customer with a name. */
@@ -25,46 +27,48 @@ export function CustomerShell({ children }: { children: ReactNode }) {
 
   const user = me?.user;
   let body: ReactNode = children;
-  if (status !== "ready") body = <div className="flex flex-1 items-center justify-center"><Spinner className="size-8 text-brand" /></div>;
+  if (status !== "ready") body = <div className="flex flex-1 items-center justify-center py-20"><Spinner className="size-6 text-muted-foreground" /></div>;
   else if (!user) body = <CustomerLogin />;
   else if (me?.worker)
     body = (
-      <div className="flex flex-col items-center gap-3 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p>{t("signedInAsWorker", { name: me.worker.name })}</p>
-        <button onClick={() => void signOut()} className="rounded-xl bg-brand px-4 py-2 text-white">{t("signOutToCustomer")}</button>
+        <Button onClick={() => void signOut()}>{t("signOutToCustomer")}</Button>
       </div>
     );
   else if (user.name === "New user") body = <CustomerName />;
 
   return (
-    <div className={`mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 pb-28 pt-4 ${langClass}`} dir={dir} lang={lang}>
-      <header className="flex items-center justify-between gap-2">
-        <Link href="/customer" className="flex min-w-0 items-center gap-2">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand text-lg">🪔</span>
-          <span className="hidden truncate text-lg font-bold text-brand min-[400px]:inline">{t("brand")}</span>
-        </Link>
-        <nav className="flex items-center gap-2">
-          <LangToggle />
-          {user && !me?.worker && (
-            <>
-            <Link href="/customer/jobs" className="flex shrink-0 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-semibold ring-1 ring-line">
-              <ClipboardList className="size-4" /> {t("myJobs")}
-            </Link>
-            <button
-              aria-label={t("signOut")}
-              onClick={async () => {
-                await signOut();
-                router.replace("/");
-              }}
-              className="flex size-9 items-center justify-center rounded-full bg-white ring-1 ring-line"
-            >
-              <LogOut className="size-4" />
-            </button>
-            </>
-          )}
-        </nav>
+    <div className={`flex flex-1 flex-col ${langClass}`} dir={dir} lang={lang}>
+      <header className="sticky top-0 z-[600] border-b border-hairline bg-background/85 backdrop-blur">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-4">
+          <Logo href="/customer" />
+          <nav className="ms-auto flex items-center gap-2">
+            <LangToggle />
+            {user && !me?.worker && (
+              <>
+                <Button asChild variant="outline" size="sm" className="h-8 rounded-lg">
+                  <Link href="/customer/jobs">
+                    <ClipboardList /> <span className="hidden min-[400px]:inline">{t("myJobs")}</span>
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("signOut")}
+                  onClick={async () => {
+                    await signOut();
+                    router.replace("/");
+                  }}
+                >
+                  <LogOut />
+                </Button>
+              </>
+            )}
+          </nav>
+        </div>
       </header>
-      {body}
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 pb-28 pt-6">{body}</div>
     </div>
   );
 }

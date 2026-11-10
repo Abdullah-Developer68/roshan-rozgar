@@ -27,14 +27,14 @@ function ReviewItem({ r }: { r: ReviewDTO }) {
     return known ? pick(known.id, known.ur) : tag;
   };
   return (
-    <li className="flex flex-col gap-1 rounded-2xl bg-white p-3 ring-1 ring-line">
+    <li className="flex flex-col gap-1 rounded-lg bg-card p-3 border border-border">
       <div className="flex items-center justify-between gap-2 text-sm">
         <span className="flex items-center gap-2">
           <Stars value={r.rating} size="size-3.5" />
           <span className="font-semibold">{r.customerName}</span>
           <span className="flex items-center gap-0.5 text-[11px] text-ok"><BadgeCheck className="size-3" /> {t("verifiedJob")}</span>
         </span>
-        <span className="text-xs text-muted">{date(r.createdAt, { month: "short", day: "numeric" })}</span>
+        <span className="text-xs text-muted-foreground">{date(r.createdAt, { month: "short", day: "numeric" })}</span>
       </div>
       {r.comment && <p className="text-sm" dir="auto">{r.comment}</p>}
       <div className="flex flex-wrap gap-1 text-[11px]">
@@ -81,22 +81,22 @@ function Profile() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <button onClick={() => router.back()} className="flex items-center gap-1 self-start text-sm text-muted">
+      <button onClick={() => router.back()} className="flex items-center gap-1 self-start text-sm text-muted-foreground">
         <ArrowLeft className="size-4 rtl:rotate-180" /> {t("back")}
       </button>
-      <section className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line">
+      <section className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm border border-border">
         <div className="flex items-start gap-4">
           <Avatar name={w.name} photoUrl={w.photoUrl} trade={w.trade} size="size-20" />
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold">
-              {pick(w.name, w.nameUr)} {w.nameUr && !isUr && <span className="urdu font-normal text-muted" lang="ur">· {w.nameUr}</span>}
+            <h1 className="text-xl font-semibold">
+              {pick(w.name, w.nameUr)} {w.nameUr && !isUr && <span className="urdu font-normal text-muted-foreground" lang="ur">· {w.nameUr}</span>}
             </h1>
             <div className="flex flex-wrap items-center gap-2">
               <TradePill trade={w.trade} />
               <StatusPill value={w.availability} />
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-sm">
-              <Stars value={w.ratingAvg} /> <b>{w.ratingAvg.toFixed(1)}</b> <span className="text-muted">{t("verifiedReviews", { n: w.ratingCount })}</span>
+              <Stars value={w.ratingAvg} /> <b>{w.ratingAvg.toFixed(1)}</b> <span className="text-muted-foreground">{t("verifiedReviews", { n: w.ratingCount })}</span>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ function Profile() {
           <Stat label={t("statHonest")} value={honesty == null ? "—" : `${honesty}%`} />
           <Stat label={t("statRehire")} value={rehirePct == null ? "—" : `${rehirePct}%`} />
         </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="flex items-center gap-1"><MapPin className="size-4" /> {isUr ? area?.ur : `${area?.en}, ${area?.city}`}</span>
           <span className="flex items-center gap-1"><CalendarDays className="size-4" /> {t("memberSince", { d: date(w.memberSince, { month: "short", year: "numeric" }) })}</span>
           <span>{t("visitCharge")} <b className="text-ink" dir="ltr">{formatPkr(w.visitCharge)}</b></span>
@@ -121,15 +121,15 @@ function Profile() {
         )}
         {w.voiceIntroUrl && (
           <div className="flex items-center gap-2 text-sm">
-            <AudioNote src={w.voiceIntroUrl} label={t("voiceIntro")} /> <span className="text-muted">{t("recordedOnJoin")}</span>
+            <AudioNote src={w.voiceIntroUrl} label={t("voiceIntro")} /> <span className="text-muted-foreground">{t("recordedOnJoin")}</span>
           </div>
         )}
       </section>
 
       {pick(w.trustSummaryEn, w.trustSummaryUr) && (
-        <section className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line">
+        <section className="rounded-xl bg-card p-4 shadow-sm border border-border">
           <div className="mb-1 flex items-center justify-between">
-            <h2 className="font-bold">{t("reviewSummary")}</h2>
+            <h2 className="font-semibold">{t("reviewSummary")}</h2>
             <AiBadge source={w.trustSummarySource} />
           </div>
           <p className="text-sm">{pick(w.trustSummaryEn, w.trustSummaryUr)}</p>
@@ -137,7 +137,7 @@ function Profile() {
       )}
 
       {priceStats.count > 0 && (
-        <p className="rounded-2xl bg-sun-soft p-3 text-sm text-amber-950">
+        <p className="rounded-lg bg-sun-soft p-3 text-sm text-foreground">
           {t("typicalPrice", {
             trade: pick(TRADES[w.trade].en, TRADES[w.trade].ur),
             range: `${formatPkr(priceStats.p25)} – ${formatPkr(priceStats.p75)}`,
@@ -154,31 +154,31 @@ function Profile() {
             if (!isSelected) toggle(w.id);
             router.push("/customer");
           }}
-          className="h-12 rounded-2xl bg-brand font-bold text-white"
+          className="h-12 rounded-lg bg-brand font-semibold text-white"
         >
           {isSelected ? t("selectedBack") : t("selectForRequest")}
         </button>
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-bold">{t("reviews")}</h2>
-        {reviews.length === 0 && <p className="text-sm text-muted">{t("noReviews")}</p>}
+        <h2 className="font-semibold">{t("reviews")}</h2>
+        {reviews.length === 0 && <p className="text-sm text-muted-foreground">{t("noReviews")}</p>}
         <ul className="flex flex-col gap-2">
           {reviews.map((r) => (
             <ReviewItem key={r.id} r={r} />
           ))}
         </ul>
       </section>
-      <Link href="/customer" className="text-center text-sm text-muted underline">{t("newRequest")}</Link>
+      <Link href="/customer" className="text-center text-sm text-muted-foreground underline">{t("newRequest")}</Link>
     </div>
   );
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-bg p-2 text-center">
-      <p className="text-lg font-bold">{value}</p>
-      <p className="text-[11px] text-muted">{label}</p>
+    <div className="rounded-lg bg-bg p-2 text-center">
+      <p className="text-lg font-semibold">{value}</p>
+      <p className="text-[11px] text-muted-foreground">{label}</p>
     </div>
   );
 }

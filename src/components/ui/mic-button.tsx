@@ -56,7 +56,7 @@ export function MicButton({
         {processing ? <Spinner className={icon} /> : live ? <Square className={`${icon} fill-white`} /> : <Mic className={icon} />}
       </button>
       {size === "xl" && (
-        <span className="h-5 text-sm font-semibold tabular-nums text-muted">{live ? `0:${String(secs).padStart(2, "0")}` : ""}</span>
+        <span className="h-5 text-sm font-semibold tabular-nums text-muted-foreground">{live ? `0:${String(secs).padStart(2, "0")}` : ""}</span>
       )}
     </div>
   );

@@ -11,7 +11,7 @@ export function SimulatedSms() {
   const { t, isUr, dir } = useT();
   const [enPart, urPart] = sms ? sms.body.split("روشن") : ["", ""];
   return (
-    <div className="rounded-2xl bg-zinc-900 p-3 text-white shadow-lg" dir={dir}>
+    <div className="rounded-lg bg-zinc-900 p-3 text-white shadow-sm" dir={dir}>
       <div className="mb-1 flex items-center justify-between text-[11px] tracking-wide text-white/60">
         <span className="flex items-center gap-1">
           <MessageCircle className="size-3.5" /> {t("smsHeader")}

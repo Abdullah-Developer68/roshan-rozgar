@@ -27,3 +27,12 @@ Next.js (App Router, Cache Components) · TypeScript · Tailwind CSS v4 · Zod �
 ### AI usage
 - The OpenRouter key is free-tier (~50 free-model requests/day). Every AI call goes through `src/server/ai/client.ts`, which caches by input hash, logs to `ai_calls`, and falls back to a deterministic parser. Never call OpenRouter from the browser.
 - UI must label AI vs fallback output honestly (the judges penalise mocked features presented as real).
+
+### Design system (monochrome, editorial)
+Tokens live in `src/app/globals.css`; components come from shadcn/ui (`src/components/ui`, style `radix-nova`, RTL enabled). Add new primitives with `npx shadcn@latest add <name>`.
+- **Palette:** off-white canvas `background` (#f7f7f5), white `card`, near-black `foreground`/`primary`, `muted-foreground` for secondary text, `faint` for the second line of two-tone headings, `hairline`/`border` for 1px rules. No decorative colour.
+- **Colour means something:** `ok` (available / confirm), `busy` (engaged), `off` (offline), `destructive` (decline/danger), amber only on the "AI offline" badge. Use these only for state.
+- **Type:** Geist, medium weight, tight tracking. Display headings use `.display` (+ `.display-faint` for the grey second line); small caps labels use `.eyebrow`. Urdu uses Nastaliq via `.urdu` / the `lang-ur` screen class.
+- **Shape:** `rounded-lg` controls, `rounded-xl` cards (`.surface`), hairline borders instead of rings, shadows only on floating layers.
+- **Layout:** thin sticky header with hairline bottom border; sections separated by `.section-rule`; framed grids use `.frame` + hairline cell borders.
+- **Buttons:** shadcn `<Button>` — `default` (black) for the primary action, `outline` for secondary, `success` for confirm/accept, size `touch` in the worker flow (low-literacy users need big targets and green/red cues; do not make the worker flow monochrome).

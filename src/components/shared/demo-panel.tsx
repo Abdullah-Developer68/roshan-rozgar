@@ -31,10 +31,10 @@ export function DemoPanel() {
             setBusy(null);
             if (ok) router.push(a.to);
           }}
-          className="flex items-center justify-between gap-2 rounded-2xl bg-white px-4 py-3 text-start text-sm font-medium ring-1 ring-line hover:ring-brand"
+          className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card px-4 py-3 text-start text-[13px] font-medium transition hover:border-foreground/40"
         >
           <span>{t(a.label)}</span>
-          <span className="flex items-center gap-2 text-xs text-muted" dir="ltr">
+          <span className="flex items-center gap-2 text-xs text-muted-foreground" dir="ltr">
             {busy === a.phone ? <Spinner className="size-4" /> : `0${a.phone.slice(3, 6)} ${a.phone.slice(6)}`}
           </span>
         </button>

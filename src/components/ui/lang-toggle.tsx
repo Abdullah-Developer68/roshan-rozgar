@@ -12,9 +12,9 @@ export function LangToggle({ className = "" }: { className?: string }) {
       role="group"
       aria-label={t("language")}
       dir="ltr"
-      className={`inline-flex shrink-0 items-center gap-0.5 rounded-full bg-white p-0.5 ring-1 ring-line ${className}`}
+      className={`inline-flex shrink-0 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5 ${className}`}
     >
-      <Languages className="mx-1 size-4 text-muted" aria-hidden />
+      <Languages className="mx-1 size-3.5 text-muted-foreground" aria-hidden />
       {(
         [
           ["en", "EN"],
@@ -26,9 +26,9 @@ export function LangToggle({ className = "" }: { className?: string }) {
           type="button"
           aria-pressed={lang === v}
           onClick={() => setLang(v)}
-          className={`h-8 rounded-full px-3 text-sm font-bold transition ${lang === v ? "bg-brand text-white" : "text-muted"}`}
+          className={`h-7 rounded-md px-2.5 text-[12px] font-medium transition ${lang === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
         >
-          <span className={v === "ur" ? "font-urdu leading-none" : "font-sans"}>{label}</span>
+          <span className={`font-sans leading-none ${v === "ur" ? "text-[13px]" : ""}`}>{label}</span>
         </button>
       ))}
     </div>

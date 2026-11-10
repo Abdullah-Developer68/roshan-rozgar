@@ -1,50 +1,176 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   Roshan Rozgar design system
+   Monochrome, editorial: warm off-white canvas, near-black ink & primary,
+   hairline borders, tight two-tone headings. Colour is reserved for meaning
+   (available / busy / confirm / danger), never decoration.
+   ========================================================================== */
 :root {
-  --bg: #f7f4ee;
-  --surface: #ffffff;
-  --ink: #17201b;
-  --muted: #5d6b63;
-  --line: #e5dfd3;
-  --brand: #0b5d3b;
-  --brand-2: #0f7a4e;
-  --brand-ink: #ffffff;
-  --sun: #f5a524;
-  --sun-soft: #fff4dc;
-  --ok: #16a34a;
-  --busy: #ea580c;
-  --off: #9ca3af;
-  --danger: #dc2626;
+  /* shadcn semantic tokens */
+  --background: #f7f7f5;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  --secondary: #efefec;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f1f1ee;
+  --muted-foreground: #6b6b67;
+  --accent: #f1f1ee;
+  --accent-foreground: #0a0a0a;
+  --destructive: #dc2626;
+  --border: #e4e4e0;
+  --input: #dcdcd7;
+  --ring: #0a0a0a;
+  --radius: 0.625rem;
+
+  /* extra design-system tokens */
+  --faint: #a3a39e; /* second line of two-tone headings */
+  --hairline: #e9e9e5; /* section frames & grid lines */
+  --ok: #16a34a; /* available / confirm */
+  --busy: #ea580c; /* engaged on a job */
+  --off: #a3a3a3; /* offline */
+  --info: #2563eb;
+
+  --chart-1: #0a0a0a;
+  --chart-2: #6b6b67;
+  --chart-3: #a3a39e;
+  --chart-4: #d4d4d0;
+  --chart-5: #efefec;
+  --sidebar: #fafaf9;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #0a0a0a;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f1f1ee;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: #e4e4e0;
+  --sidebar-ring: #0a0a0a;
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-ink: var(--ink);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-urdu: var(--font-urdu), "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", var(--font-geist-sans), sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-line: var(--line);
-  --color-brand: var(--brand);
-  --color-brand-2: var(--brand-2);
-  --color-sun: var(--sun);
-  --color-sun-soft: var(--sun-soft);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-faint: var(--faint);
+  --color-hairline: var(--hairline);
   --color-ok: var(--ok);
   --color-busy: var(--busy);
   --color-off: var(--off);
-  --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-urdu: var(--font-urdu), "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", var(--font-geist-sans), sans-serif;
+  --color-info: var(--info);
+  --color-danger: var(--destructive);
+
+  /* Legacy aliases used across feature components — all resolve to the system above. */
+  --color-bg: var(--background);
+  --color-surface: var(--card);
+  --color-ink: var(--foreground);
+  --color-line: var(--border);
+  --color-brand: var(--primary);
+  --color-brand-2: #262626;
+  --color-sun: var(--foreground);
+  --color-sun-soft: var(--muted);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-html {
-  color-scheme: light;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: light;
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
+    text-wrap: balance;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  -webkit-tap-highlight-color: transparent;
+@layer components {
+  /* Two-tone display heading: dark first line, faint second line. */
+  .display {
+    @apply font-medium tracking-[-0.035em] text-foreground;
+    line-height: 1.05;
+  }
+  .display-faint {
+    @apply text-faint;
+  }
+  /* Small uppercase eyebrow label. */
+  .eyebrow {
+    @apply text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase;
+  }
+  /* Bordered page frame with hairline side rails (as in the reference grid). */
+  .frame {
+    @apply mx-auto w-full max-w-6xl border-x border-hairline;
+  }
+  .section-rule {
+    @apply border-t border-hairline;
+  }
+  /* Card surface used across the app. */
+  .surface {
+    @apply rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(10,10,10,0.04)];
+  }
 }
+
+/* ------------------------------ Urdu ------------------------------ */
 
 /* Nastaliq needs generous line height or ascenders/descenders collide. */
 .urdu,
@@ -53,24 +179,6 @@ body {
   font-family: var(--font-urdu), var(--font-geist-sans), sans-serif;
   line-height: 2.1;
   letter-spacing: 0;
-}
-
-.leaflet-container {
-  font-family: var(--font-sans);
-  border-radius: 1rem;
-}
-
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
-  70% { box-shadow: 0 0 0 22px rgba(220, 38, 38, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-}
-.mic-live {
-  animation: pulse-ring 1.4s ease-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mic-live { animation: none; }
 }
 
 /* Large Nastaliq headings have very tall ascenders/descenders. */
@@ -88,9 +196,30 @@ body {
 }
 .lang-ur :where(p, span, a, button, label, li, h1, h2, h3, input, textarea, select, option) {
   line-height: 2;
+  letter-spacing: 0;
 }
 .lang-ur [dir="ltr"],
 .lang-ur .font-sans {
   font-family: var(--font-geist-sans), sans-serif;
   line-height: 1.4;
+}
+
+/* ------------------------------ misc ------------------------------ */
+
+.leaflet-container {
+  font-family: var(--font-geist-sans), sans-serif;
+  border-radius: 0.75rem;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
+  70% { box-shadow: 0 0 0 22px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.mic-live {
+  animation: pulse-ring 1.4s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mic-live { animation: none; }
 }

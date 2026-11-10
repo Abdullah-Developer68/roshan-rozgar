@@ -33,7 +33,7 @@ function MicLangToggle() {
         <button
           key={v}
           onClick={() => setSttLang(v)}
-          className={`rounded-full px-4 py-1 text-sm font-semibold ${sttLang === v ? "bg-brand text-white" : "bg-white text-muted ring-1 ring-line"}`}
+          className={`rounded-full px-4 py-1 text-sm font-semibold ${sttLang === v ? "bg-brand text-white" : "bg-card text-muted-foreground border border-border"}`}
         >
           🎤 <span className={v === "ur-PK" ? "font-urdu" : "font-sans"}>{label}</span>
         </button>
@@ -50,11 +50,11 @@ function LiveTranscript() {
   const { t } = useT();
   const text = `${finalText} ${interim}`.trim();
   return (
-    <div className="min-h-24 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line" aria-live="polite">
+    <div className="min-h-24 rounded-xl bg-card p-4 shadow-sm border border-border" aria-live="polite">
       {text ? (
         <p className="urdu text-lg" dir="auto">{text}</p>
       ) : status === "listening" ? (
-        <p className="text-center text-lg text-muted">{t("listening")}</p>
+        <p className="text-center text-lg text-muted-foreground">{t("listening")}</p>
       ) : (
         <p className="text-center text-3xl tracking-widest text-zinc-300">• • •</p>
       )}
@@ -78,7 +78,7 @@ export function SpeakStep() {
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
         <Spinner className="size-14 text-brand" />
         <p className="text-xl">{pick(P.thinking.en, P.thinking.ur)}</p>
-        <p className="text-xs text-muted">{t("aiBuilding")}</p>
+        <p className="text-xs text-muted-foreground">{t("aiBuilding")}</p>
       </div>
     );
 
@@ -87,14 +87,14 @@ export function SpeakStep() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{t("speakTitle")}</h1>
-          <p className="text-xs text-muted">{t("speakSub")}</p>
+          <p className="text-xs text-muted-foreground">{t("speakSub")}</p>
         </div>
         <SpeakButton ur={P.speak.ur} hi={P.speak.hi} en={P.speak.en} size="lg" />
       </div>
 
       <ul className="grid grid-cols-5 gap-2">
         {HINTS.map((h) => (
-          <li key={h.key} className="flex flex-col items-center rounded-2xl bg-white py-2 shadow-sm ring-1 ring-line">
+          <li key={h.key} className="flex flex-col items-center rounded-lg bg-card py-2 shadow-sm border border-border">
             <span className="text-2xl" aria-hidden>{h.icon}</span>
             <span className="text-sm">{t(h.key)}</span>
           </li>
@@ -104,21 +104,21 @@ export function SpeakStep() {
       <div className="flex flex-col items-center gap-3 py-2">
         <MicButton id="onboard" record onDone={(r) => void extract(r.text, r.blob, r.mediaId)} />
         <MicLangToggle />
-        {!sttSupported() && <p className="text-center text-xs text-muted">{t("noStt")}</p>}
+        {!sttSupported() && <p className="text-center text-xs text-muted-foreground">{t("noStt")}</p>}
       </div>
 
       <LiveTranscript />
 
-      <div className="flex items-center gap-3 rounded-2xl bg-sun-soft p-3 ring-1 ring-amber-200">
+      <div className="flex items-center gap-3 rounded-lg bg-sun-soft p-3 ring-1 ring-border">
         <SpeakButton ur={P.example.ur} hi={P.example.hi} en={P.example.en} />
-        <p className="text-sm text-amber-900">
+        <p className="text-sm text-foreground">
           <b>{t("example")}</b> {pick(P.example.en, P.example.ur)}
         </p>
       </div>
 
-      {error && <p className="rounded-2xl bg-red-50 p-3 text-center text-sm text-red-800">{error}</p>}
+      {error && <p className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-800">{error}</p>}
 
-      <div className="mt-auto flex justify-center gap-4 text-sm text-muted">
+      <div className="mt-auto flex justify-center gap-4 text-sm text-muted-foreground">
         <button onClick={() => setTyping((v) => !v)} className="flex items-center gap-1 underline">
           <Keyboard className="size-4" /> {t("typeInstead")}
         </button>
@@ -134,9 +134,9 @@ export function SpeakStep() {
             rows={3}
             dir="auto"
             placeholder="Mera naam Aslam hai, electrician hoon, 15 saal tajurba, G-9, 500 rupay fee"
-            className="rounded-2xl bg-white p-3 ring-1 ring-line outline-none focus:ring-2 focus:ring-brand"
+            className="rounded-lg bg-card p-3 border border-border outline-none focus:ring-2 focus:ring-brand"
           />
-          <button onClick={() => void extract(typed, null, null)} className="h-11 rounded-2xl bg-brand font-semibold text-white">
+          <button onClick={() => void extract(typed, null, null)} className="h-11 rounded-lg bg-brand font-semibold text-white">
             {t("makeProfile")}
           </button>
         </div>

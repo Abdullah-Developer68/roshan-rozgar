@@ -28,11 +28,11 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
 
   if (!available)
     return (
-      <li className="flex items-center gap-3 rounded-2xl bg-white/60 p-3 opacity-70 ring-1 ring-line">
+      <li className="flex items-center gap-3 rounded-lg bg-white/60 p-3 opacity-70 border border-border">
         <Avatar name={w.name} photoUrl={w.photoUrl} size="size-10" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{pick(w.name, w.nameUr)}</p>
-          <p className="text-xs text-muted" dir="ltr">{w.distanceKm} km · ★ {w.ratingAvg.toFixed(1)}</p>
+          <p className="text-xs text-muted-foreground" dir="ltr">{w.distanceKm} km · ★ {w.ratingAvg.toFixed(1)}</p>
         </div>
         <StatusPill value={w.availability} />
       </li>
@@ -41,21 +41,21 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
   return (
     <li
       onMouseEnter={() => setFocused(w.id)}
-      className={`flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 transition ${selected ? "ring-2 ring-brand" : focused ? "ring-brand/40" : "ring-line"}`}
+      className={`flex flex-col gap-3 rounded-xl bg-card p-4 shadow-sm ring-1 transition ${selected ? "ring-2 ring-brand" : focused ? "ring-brand/40" : "ring-line"}`}
     >
       <div className="flex items-start gap-3">
         <Avatar name={w.name} photoUrl={w.photoUrl} trade={w.trade} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate font-bold">{pick(w.name, w.nameUr)}</p>
-            {best && <span className="rounded-full bg-sun px-2 py-0.5 text-[11px] font-bold text-amber-950">{t("bestMatch")}</span>}
+            <p className="truncate font-semibold">{pick(w.name, w.nameUr)}</p>
+            {best && <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">{t("bestMatch")}</span>}
           </div>
           <div className="flex items-center gap-1.5 text-sm">
             <Stars value={w.ratingAvg} />
             <span className="font-semibold">{w.ratingCount ? w.ratingAvg.toFixed(1) : t("new")}</span>
-            <span className="text-muted">({w.ratingCount})</span>
+            <span className="text-muted-foreground">({w.ratingCount})</span>
           </div>
-          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="size-3.5" /><span dir="ltr">{w.distanceKm} km · {AREA_BY_ID[w.areaId]?.en}</span></span>
             <span className="flex items-center gap-1"><Clock className="size-3.5" />{t("minAway", { n: w.etaMin })}</span>
             <span className="flex items-center gap-1"><BadgeCheck className="size-3.5 text-ok" />{t("jobsDoneHere", { n: w.jobsCompleted })}</span>
@@ -63,14 +63,14 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
           </div>
         </div>
         <div className="text-end">
-          <p className="text-xs text-muted">{t("visit")}</p>
-          <p className="font-bold" dir="ltr">Rs {w.visitCharge.toLocaleString("en-PK")}</p>
+          <p className="text-xs text-muted-foreground">{t("visit")}</p>
+          <p className="font-semibold" dir="ltr">Rs {w.visitCharge.toLocaleString("en-PK")}</p>
         </div>
       </div>
       {pick(w.trustSummaryEn, w.trustSummaryUr) && (
-        <div className="rounded-2xl bg-bg p-3 text-sm">
+        <div className="rounded-lg bg-bg p-3 text-sm">
           <div className="mb-1 flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">{t("whatCustomersSay")}</span>
+            <span className="text-xs font-semibold text-muted-foreground">{t("whatCustomersSay")}</span>
             <AiBadge source={w.trustSummarySource} />
           </div>
           <p>{pick(w.trustSummaryEn, w.trustSummaryUr)}</p>
@@ -93,7 +93,7 @@ export function WorkerCard({ worker: w }: { worker: WorkerSearchResult }) {
         <button
           onClick={() => toggle(w.id)}
           aria-pressed={selected}
-          className={`ms-auto h-10 rounded-xl px-4 text-sm font-bold ${selected ? "bg-brand text-white" : "bg-brand/10 text-brand"}`}
+          className={`ms-auto h-10 rounded-lg px-4 text-sm font-semibold ${selected ? "bg-brand text-white" : "bg-brand/10 text-brand"}`}
         >
           {selected ? t("selected") : t("select")}
         </button>

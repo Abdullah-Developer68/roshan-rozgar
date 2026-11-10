@@ -38,26 +38,26 @@ export function WorkerPhoneLogin() {
 
       {step === "phone" ? (
         <>
-          <div className="flex h-20 items-center justify-center rounded-3xl bg-white text-4xl font-black tracking-wider tabular-nums shadow-sm ring-1 ring-line" dir="ltr">
+          <div className="flex h-20 items-center justify-center rounded-xl bg-card text-4xl font-black tracking-wider tabular-nums shadow-sm border border-border" dir="ltr">
             {formatted || <span className="text-zinc-300">03XX XXXXXXX</span>}
           </div>
           <div className="grid grid-cols-3 gap-3" dir="ltr">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-              <button key={d} onClick={() => pressDigit(d)} className="h-16 rounded-2xl bg-white text-3xl font-bold shadow-sm ring-1 ring-line active:scale-95 active:bg-zinc-50">
+              <button key={d} onClick={() => pressDigit(d)} className="h-16 rounded-lg bg-card text-3xl font-bold shadow-sm border border-border active:scale-95 active:bg-zinc-50">
                 {d}
               </button>
             ))}
-            <button onClick={backspace} aria-label="Delete" className="flex h-16 items-center justify-center rounded-2xl bg-zinc-100 active:scale-95">
+            <button onClick={backspace} aria-label="Delete" className="flex h-16 items-center justify-center rounded-lg bg-zinc-100 active:scale-95">
               <Delete className="size-8" />
             </button>
-            <button onClick={() => pressDigit("0")} className="h-16 rounded-2xl bg-white text-3xl font-bold shadow-sm ring-1 ring-line active:scale-95">
+            <button onClick={() => pressDigit("0")} className="h-16 rounded-lg bg-card text-3xl font-bold shadow-sm border border-border active:scale-95">
               0
             </button>
             <button
               onClick={() => void sendCode()}
               disabled={!ready || busy}
               aria-label="Send code"
-              className="flex h-16 items-center justify-center rounded-2xl bg-ok text-white shadow active:scale-95 disabled:bg-zinc-200 disabled:text-zinc-400"
+              className="flex h-16 items-center justify-center rounded-lg bg-ok text-white shadow active:scale-95 disabled:bg-zinc-200 disabled:text-zinc-400"
             >
               {busy ? <Spinner className="size-8" /> : <Check className="size-9" strokeWidth={3} />}
             </button>
@@ -68,7 +68,7 @@ export function WorkerPhoneLogin() {
           <SimulatedSms />
           <div className="flex justify-center gap-2" dir="ltr">
             {Array.from({ length: 6 }).map((_, i) => (
-              <span key={i} className="flex h-16 w-12 items-center justify-center rounded-2xl bg-white text-3xl font-black shadow-sm ring-1 ring-line">
+              <span key={i} className="flex h-16 w-12 items-center justify-center rounded-lg bg-card text-3xl font-black shadow-sm border border-border">
                 {code[i] ?? ""}
               </span>
             ))}
@@ -76,17 +76,17 @@ export function WorkerPhoneLogin() {
           <button
             onClick={() => void verify()}
             disabled={code.length !== 6 || busy}
-            className="flex h-20 items-center justify-center gap-3 rounded-3xl bg-ok text-white shadow-lg active:scale-[0.98] disabled:opacity-50"
+            className="flex h-20 items-center justify-center gap-3 rounded-xl bg-ok text-white shadow-sm active:scale-[0.98] disabled:opacity-50"
           >
             {busy ? <Spinner className="size-8" /> : <Check className="size-10" strokeWidth={3} />}
             <span className="text-2xl font-bold">{t("ok")}</span>
           </button>
-          <button onClick={reset} className="flex items-center justify-center gap-2 text-sm text-muted">
+          <button onClick={reset} className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <MessageSquareText className="size-4" /> {t("changeNumber")}
           </button>
         </>
       )}
-      {error && <p className="rounded-2xl bg-red-50 p-3 text-center text-sm text-red-800">{error}</p>}
+      {error && <p className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-800">{error}</p>}
     </div>
   );
 }

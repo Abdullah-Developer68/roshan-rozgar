@@ -22,7 +22,7 @@ import { useT, type MsgKey } from "@/lib/i18n";
 import type { JobStatus, MessageDTO } from "@/lib/types";
 
 const STATUS_CLS: Record<JobStatus, string> = {
-  requested: "bg-sun-soft text-amber-900",
+  requested: "bg-sun-soft text-foreground",
   booked: "bg-orange-100 text-orange-900",
   completed: "bg-emerald-100 text-emerald-900",
   declined: "bg-zinc-100 text-zinc-700",
@@ -46,12 +46,12 @@ function Header() {
   const Back = isUr ? ArrowRight : ArrowLeft;
   return (
     <header className="sticky top-0 z-20 -mx-4 flex items-center gap-3 border-b border-line bg-bg/95 px-4 py-3 backdrop-blur">
-      <Link href={isWorker ? "/worker" : "/customer/jobs"} aria-label={t("back")} className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-line">
+      <Link href={isWorker ? "/worker" : "/customer/jobs"} aria-label={t("back")} className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card border border-border">
         <Back className="size-5" />
       </Link>
       <Avatar name={isWorker ? job.customer.name : job.worker.name} photoUrl={other.photo} size="size-10" />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-bold">{other.name}</p>
+        <p className="truncate font-semibold">{other.name}</p>
         <span className={`inline-block rounded-full px-2 text-xs font-semibold ${STATUS_CLS[job.status]}`}>{t(statusKey(job.status))}</span>
       </div>
       <LangToggle />
@@ -72,7 +72,7 @@ function JobCard() {
   const area = AREA_BY_ID[job.areaId];
   const summary = pick(job.summaryEn, job.summaryUr) || job.problemText;
   return (
-    <section className="flex flex-col gap-2 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-line">
+    <section className="flex flex-col gap-2 rounded-xl bg-card p-4 shadow-sm border border-border">
       <div className="flex items-center justify-between gap-2">
         <TradePill trade={job.trade} />
         <AiBadge source={job.triageSource} />
@@ -82,19 +82,19 @@ function JobCard() {
         <SpeakButton ur={job.summaryUr} en={job.summaryEn || job.problemText} size="sm" />
       </div>
       {summary !== job.problemText && (
-        <p className="text-sm text-muted" dir="auto">“{job.problemText}”</p>
+        <p className="text-sm text-muted-foreground" dir="auto">“{job.problemText}”</p>
       )}
       {job.photoUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={job.photoUrl} alt="Problem" className="max-h-56 rounded-2xl object-cover" />
+        <img src={job.photoUrl} alt="Problem" className="max-h-56 rounded-lg object-cover" />
       )}
-      <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span className="flex items-center gap-1">
           <MapPin className="size-4" /> <span dir="ltr">{area?.en}</span>
           {job.distanceKm != null ? ` · ${t("kmFromWorker", { km: job.distanceKm })}` : ""}
         </span>
         {job.agreedPrice != null && (
-          <span className="rounded-full bg-emerald-50 px-2 font-bold text-emerald-800">{t("agreedX", { a: job.agreedPrice.toLocaleString("en-PK") })}</span>
+          <span className="rounded-full bg-emerald-50 px-2 font-semibold text-emerald-800">{t("agreedX", { a: job.agreedPrice.toLocaleString("en-PK") })}</span>
         )}
       </div>
       {job.status === "booked" && (
@@ -120,7 +120,7 @@ function Bubble({ m }: { m: MessageDTO }) {
 
   if (m.kind === "system")
     return (
-      <li className="mx-auto max-w-[85%] rounded-2xl bg-zinc-100 px-3 py-1.5 text-center text-xs text-zinc-700">
+      <li className="mx-auto max-w-[85%] rounded-lg bg-zinc-100 px-3 py-1.5 text-center text-xs text-zinc-700">
         {pick(m.textEn, m.textUr) || m.text}
       </li>
     );
@@ -133,23 +133,23 @@ function Bubble({ m }: { m: MessageDTO }) {
     const canAccept = pending && !mine;
     const who = m.senderRole === "worker" ? t("workersPrice") : t("customersOffer");
     return (
-      <li className={`${align} w-[80%] max-w-xs rounded-3xl p-4 shadow-sm ring-2 ${m.offerStatus === "accepted" ? "bg-emerald-50 ring-ok" : pending ? "bg-sun-soft ring-sun" : "bg-white opacity-60 ring-line"}`}>
+      <li className={`${align} w-[80%] max-w-xs rounded-xl p-4 shadow-sm ring-2 ${m.offerStatus === "accepted" ? "bg-emerald-50 ring-ok" : pending ? "bg-sun-soft ring-sun" : "bg-card opacity-60 ring-line"}`}>
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-semibold">{who}</span>
           <AiBadge source={m.aiSource} />
         </div>
         <p className="text-3xl font-black" dir="ltr">Rs {m.offerAmount?.toLocaleString("en-PK")}</p>
-        <p className="text-xs font-semibold text-muted">
+        <p className="text-xs font-semibold text-muted-foreground">
           {m.offerStatus === "accepted" ? t("offerAccepted") : m.offerStatus === "superseded" ? t("offerReplaced") : mine ? t("offerWaiting") : t("offerNew")}
         </p>
         {canAccept && (
           <button
             onClick={() => void accept(m.id)}
             disabled={acting}
-            className="mt-2 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-ok text-white shadow active:scale-[0.98] disabled:opacity-60"
+            className="mt-2 flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-ok text-white shadow active:scale-[0.98] disabled:opacity-60"
           >
             {acting ? <Spinner /> : <CheckCheck className="size-7" />}
-            <span className="text-lg font-bold">{t("acceptBook")}</span>
+            <span className="text-lg font-semibold">{t("acceptBook")}</span>
           </button>
         )}
       </li>
@@ -159,7 +159,7 @@ function Bubble({ m }: { m: MessageDTO }) {
   const primary = pick(m.textEn, m.textUr) || m.text;
   const secondary = primary !== m.text ? m.text : null;
   return (
-    <li className={`${align} flex max-w-[85%] flex-col gap-1.5 rounded-3xl px-4 py-3 shadow-sm ${mine ? "bg-brand text-white" : "bg-white ring-1 ring-line"}`}>
+    <li className={`${align} flex max-w-[85%] flex-col gap-1.5 rounded-xl px-4 py-3 shadow-sm ${mine ? "bg-brand text-white" : "bg-card border border-border"}`}>
       {m.audioUrl && <AudioNote src={m.audioUrl} tone={mine ? "dark" : "light"} />}
       {primary && (
         <div className="flex items-start gap-2">
@@ -167,7 +167,7 @@ function Bubble({ m }: { m: MessageDTO }) {
           {!mine && (m.textUr || m.textEn) && <SpeakButton ur={m.textUr} en={m.textEn} size="sm" />}
         </div>
       )}
-      {secondary && <p className={`text-xs ${mine ? "text-white/70" : "text-muted"}`}>
+      {secondary && <p className={`text-xs ${mine ? "text-white/70" : "text-muted-foreground"}`}>
           {t("original")} <span dir="auto">{secondary}</span>
         </p>}
       {m.aiSource && !mine && (m.textEn || m.textUr) && (
@@ -201,7 +201,7 @@ function LiveCaption() {
   const interim = useVoiceStore((s) => s.interim);
   if (ownerId !== "thread") return null;
   const text = `${finalText} ${interim}`.trim();
-  return <p className="urdu rounded-2xl bg-white/90 px-3 py-1 text-center text-base ring-1 ring-line" dir="auto">{text || "…"}</p>;
+  return <p className="urdu rounded-lg bg-white/90 px-3 py-1 text-center text-base border border-border" dir="auto">{text || "…"}</p>;
 }
 
 function PriceBar() {
@@ -216,12 +216,12 @@ function PriceBar() {
   const mineIsLatest = offer && offer.by === job.viewerRole;
   const value = counter ?? job.worker.visitCharge;
   return (
-    <div className="flex flex-col gap-2 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-line">
+    <div className="flex flex-col gap-2 rounded-xl bg-card p-3 shadow-sm border border-border">
       <PriceStepper value={value} onChange={setCounter} />
       <button
         onClick={() => void sendOffer(value)}
         disabled={acting || (!!mineIsLatest && offer?.amount === value)}
-        className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-sun font-bold text-amber-950 active:scale-[0.98] disabled:opacity-50"
+        className="flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground active:scale-[0.98] disabled:opacity-50"
       >
         <span className="text-lg">{t("sendPrice")}</span>
       </button>
@@ -245,7 +245,7 @@ function Composer() {
       <div className="flex items-center gap-2">
         <MicButton id="thread" size="md" record onDone={(r) => void sendVoice(r)} disabled={sending} />
         <form
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white py-1 pl-4 pr-1 ring-1 ring-line"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card py-1 pl-4 pr-1 border border-border"
           onSubmit={(e) => {
             e.preventDefault();
             void sendText();
@@ -263,7 +263,7 @@ function Composer() {
           </button>
         </form>
       </div>
-      <p className="text-center text-[11px] text-muted">
+      <p className="text-center text-[11px] text-muted-foreground">
         {isWorker ? t("noteWorker") : t("noteCustomer")}
       </p>
     </div>
@@ -287,11 +287,11 @@ function Actions() {
         <button
           onClick={() => void complete()}
           disabled={acting}
-          className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-ok font-bold text-white active:scale-[0.98]"
+          className="flex h-14 flex-1 items-center justify-center gap-2 rounded-lg bg-ok font-semibold text-white active:scale-[0.98]"
         >
           <CheckCheck className="size-6" /> <span className="text-lg">{t("jobDone")}</span>
         </button>
-        <button onClick={() => void close("cancel")} disabled={acting} className="h-14 rounded-2xl bg-white px-4 text-sm text-danger ring-1 ring-line">
+        <button onClick={() => void close("cancel")} disabled={acting} className="h-14 rounded-lg bg-card px-4 text-sm text-danger border border-border">
           {t("cancel")}
         </button>
       </div>
@@ -302,7 +302,7 @@ function Actions() {
       <button
         onClick={() => void close(isWorker ? "decline" : "cancel")}
         disabled={acting}
-        className="flex h-11 items-center justify-center gap-1 rounded-2xl text-sm text-danger"
+        className="flex h-11 items-center justify-center gap-1 rounded-lg text-sm text-danger"
       >
         <X className="size-4" /> {isWorker ? t("cantDo") : t("cancelRequest")}
       </button>
@@ -310,25 +310,25 @@ function Actions() {
 
   if (job.status === "completed") {
     if (isWorker)
-      return <p className="rounded-2xl bg-emerald-50 p-3 text-center text-lg text-emerald-900">{t("thanksWorker")}</p>;
+      return <p className="rounded-lg bg-emerald-50 p-3 text-center text-lg text-emerald-900">{t("thanksWorker")}</p>;
     if (job.hasReview)
-      return <p className="rounded-2xl bg-emerald-50 p-3 text-center text-emerald-900">{t("thanksReviewed", { name: job.worker.name })}</p>;
+      return <p className="rounded-lg bg-emerald-50 p-3 text-center text-emerald-900">{t("thanksReviewed", { name: job.worker.name })}</p>;
     return reviewOpen ? (
       <ReviewForm />
     ) : (
-      <button onClick={() => setReviewOpen(true)} className="h-12 rounded-2xl bg-sun font-bold text-amber-950">
+      <button onClick={() => setReviewOpen(true)} className="h-12 rounded-lg bg-primary font-semibold text-primary-foreground">
         {t("rateX", { name: job.worker.name })}
       </button>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-100 p-3 text-center text-sm">
+    <div className="flex flex-col items-center gap-2 rounded-lg bg-zinc-100 p-3 text-center text-sm">
       <p>
         {t(statusKey(job.status))}. {job.closeReason === "worker_busy" ? t("tookOtherJob") : ""}
       </p>
       {!isWorker && (
-        <Link href="/customer" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white">
+        <Link href="/customer" className="rounded-lg bg-brand px-4 py-2 font-semibold text-white">
           {t("findAnother")}
         </Link>
       )}
@@ -343,7 +343,7 @@ function WorkerThreadHint() {
   useAutoSpeak(P.thread, isWorker && status === "requested");
   if (!isWorker || status !== "requested") return null;
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-sun-soft p-2 ring-1 ring-amber-200">
+    <div className="flex items-center gap-2 rounded-lg bg-sun-soft p-2 ring-1 ring-border">
       <SpeakButton ur={P.thread.ur} hi={P.thread.hi} en={P.thread.en} size="sm" />
       <p className="text-sm">{t("threadHint")}</p>
     </div>
@@ -374,7 +374,7 @@ export function JobThreadScreen() {
     return (
       <div className={`flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center ${langClass}`} dir={dir}>
         <p>{t("jobNotFound")}</p>
-        <Link href="/" className="rounded-xl bg-brand px-4 py-2 text-white">{t("home")}</Link>
+        <Link href="/" className="rounded-lg bg-brand px-4 py-2 text-white">{t("home")}</Link>
       </div>
     );
 

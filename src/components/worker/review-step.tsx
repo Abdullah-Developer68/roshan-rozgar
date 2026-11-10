@@ -44,11 +44,11 @@ function FieldCard({
   const open = fixing === field;
   const missing = value == null;
   return (
-    <div className={`rounded-3xl bg-white shadow-sm ring-1 ${missing ? "ring-2 ring-red-300" : "ring-line"}`}>
+    <div className={`rounded-xl bg-card shadow-sm ring-1 ${missing ? "ring-2 ring-red-300" : "ring-line"}`}>
       <div className="flex items-center gap-3 p-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-bg text-2xl" aria-hidden>{icon}</span>
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-bg text-2xl" aria-hidden>{icon}</span>
         <button className="flex min-w-0 flex-1 flex-col items-start text-start" onClick={() => setFixing(open ? null : field)}>
-          <span className="text-sm text-muted">{label}</span>
+          <span className="text-sm text-muted-foreground">{label}</span>
           <span className="w-full truncate text-xl font-bold">
             {missing ? <span className="text-base font-normal text-red-700">{pick(P.missing.en, P.missing.ur)}</span> : value}
           </span>
@@ -90,7 +90,7 @@ function NameFix() {
         value={name}
         onChange={(e) => setField("name", e.target.value)}
         placeholder={t("name")}
-        className="min-w-0 flex-1 rounded-2xl bg-bg px-3 py-3 text-lg outline-none ring-1 ring-line"
+        className="min-w-0 flex-1 rounded-lg bg-bg px-3 py-3 text-lg outline-none border border-border"
       />
     </div>
   );
@@ -110,7 +110,7 @@ function TradeFix() {
             setField("trade", tr.id);
             setFixing(null);
           }}
-          className={`flex flex-col items-center rounded-2xl p-2 ${trade === tr.id ? "bg-brand text-white" : "bg-bg"}`}
+          className={`flex flex-col items-center rounded-lg p-2 ${trade === tr.id ? "bg-brand text-white" : "bg-bg"}`}
         >
           <span className="text-3xl" aria-hidden>{tr.emoji}</span>
           <span className="text-xs">{pick(tr.en, tr.ur)}</span>
@@ -126,13 +126,13 @@ function YearsFix() {
   const { t } = useT();
   return (
     <div className="flex items-center justify-between" dir="ltr">
-      <button className="size-14 rounded-2xl bg-brand/10 text-3xl font-bold text-brand" onClick={() => setField("experienceYears", Math.max(0, (years ?? 1) - 1))}>
+      <button className="size-14 rounded-lg bg-brand/10 text-3xl font-bold text-brand" onClick={() => setField("experienceYears", Math.max(0, (years ?? 1) - 1))}>
         −
       </button>
       <span className="text-4xl font-black tabular-nums">
         {years ?? 0} <span className="text-lg font-normal">{t("years")}</span>
       </span>
-      <button className="size-14 rounded-2xl bg-brand/10 text-3xl font-bold text-brand" onClick={() => setField("experienceYears", (years ?? 0) + 1)}>
+      <button className="size-14 rounded-lg bg-brand/10 text-3xl font-bold text-brand" onClick={() => setField("experienceYears", (years ?? 0) + 1)}>
         +
       </button>
     </div>
@@ -148,7 +148,7 @@ function AreaFix() {
   const { t, isUr } = useT();
   return (
     <div className="flex flex-col gap-3">
-      <button onClick={() => void locateMe()} className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-brand text-white">
+      <button onClick={() => void locateMe()} className="flex h-14 items-center justify-center gap-2 rounded-lg bg-brand text-white">
         {locating ? <Spinner /> : <LocateFixed className="size-6" />}
         <span className="text-lg">{t("takeLocation")}</span>
       </button>
@@ -162,7 +162,7 @@ function AreaFix() {
               setField("lng", null);
               setFixing(null);
             }}
-            className={`rounded-xl px-2 py-1.5 text-sm ${areaId === a.id ? "bg-brand text-white" : "bg-bg"}`}
+            className={`rounded-lg px-2 py-1.5 text-sm ${areaId === a.id ? "bg-brand text-white" : "bg-bg"}`}
           >
             <span className="block font-semibold font-sans" dir="ltr">{a.en}</span>
             {isUr && <span className="urdu block text-xs leading-6" lang="ur">{a.ur}</span>}
@@ -208,7 +208,7 @@ export function ReviewStep() {
         <div>
           <h1 className="text-2xl font-bold">{t("profileTitle")}</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-muted">{t("profileSub")}</span>
+            <span className="text-xs text-muted-foreground">{t("profileSub")}</span>
             <AiBadge source={source} />
           </div>
         </div>
@@ -269,7 +269,7 @@ export function ReviewStep() {
       {draft.skills.length > 0 && (
         <div className="flex flex-wrap gap-1.5" dir="ltr">
           {draft.skills.map((s) => (
-            <span key={s} className="rounded-full bg-white px-3 py-1 text-xs font-medium ring-1 ring-line">{s}</span>
+            <span key={s} className="rounded-full bg-card px-3 py-1 text-xs font-medium border border-border">{s}</span>
           ))}
         </div>
       )}
@@ -284,12 +284,12 @@ export function ReviewStep() {
             }
             setStep("photo");
           }}
-          className={`flex h-20 items-center justify-center gap-3 rounded-3xl text-white shadow-lg active:scale-[0.98] ${missing.length ? "bg-zinc-400" : "bg-ok"}`}
+          className={`flex h-20 items-center justify-center gap-3 rounded-xl text-white shadow-sm active:scale-[0.98] ${missing.length ? "bg-zinc-400" : "bg-ok"}`}
         >
           <Check className="size-10" strokeWidth={3} />
           <span className="text-2xl font-bold">{t("allCorrect")}</span>
         </button>
-        <button onClick={() => setStep("speak")} className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-line">
+        <button onClick={() => setStep("speak")} className="flex h-12 items-center justify-center gap-2 rounded-lg bg-card border border-border">
           <Mic className="size-5" /> {t("speakAgain")}
         </button>
       </div>

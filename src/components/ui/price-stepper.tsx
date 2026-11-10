@@ -15,7 +15,7 @@ export function PriceStepper({
   min?: number;
   dark?: boolean;
 }) {
-  const btn = `flex size-14 items-center justify-center rounded-2xl text-2xl font-bold active:scale-95 transition ${
+  const btn = `flex size-14 items-center justify-center rounded-lg text-2xl font-bold active:scale-95 transition ${
     dark ? "bg-white/15 text-white" : "bg-brand/10 text-brand"
   }`;
   return (
@@ -24,7 +24,7 @@ export function PriceStepper({
         <Minus className="size-7" />
       </button>
       <div className="flex flex-col items-center">
-        <span className={`text-xs font-semibold ${dark ? "text-white/70" : "text-muted"}`}>Rs</span>
+        <span className={`text-xs font-semibold ${dark ? "text-white/70" : "text-muted-foreground"}`}>Rs</span>
         <span className="text-4xl font-black tabular-nums">{value.toLocaleString("en-PK")}</span>
       </div>
       <button type="button" aria-label="Increase price" className={btn} onClick={() => onChange(value + step)}>

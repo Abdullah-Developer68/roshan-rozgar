@@ -29,15 +29,15 @@ export function CustomerName() {
         }
       }}
     >
-      <h1 className="text-2xl font-bold">{t("nameTitle")}</h1>
+      <h1 className="text-2xl font-semibold">{t("nameTitle")}</h1>
       <input
         autoFocus
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder={t("namePh")}
-        className="rounded-2xl bg-white px-4 py-3 text-lg ring-1 ring-line outline-none focus:ring-2 focus:ring-brand"
+        className="rounded-lg bg-card px-4 py-3 text-lg border border-border outline-none focus:ring-2 focus:ring-brand"
       />
-      <button disabled={busy} className="flex h-12 items-center justify-center rounded-2xl bg-brand font-semibold text-white">
+      <button disabled={busy} className="flex h-12 items-center justify-center rounded-lg bg-brand font-semibold text-white">
         {busy ? <Spinner /> : t("continue")}
       </button>
     </form>

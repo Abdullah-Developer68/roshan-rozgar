@@ -47,7 +47,7 @@ export function WorkerMap() {
   const avail: Record<string, MsgKey> = { available: "statusAvailable", busy: "statusBusy", offline: "statusOffline" };
 
   return (
-    <div className="h-64 overflow-hidden rounded-2xl ring-1 ring-line lg:h-[28rem]" dir="ltr">
+    <div className="h-64 overflow-hidden rounded-lg border border-border lg:h-[28rem]" dir="ltr">
       <MapContainer center={[lat, lng]} zoom={13} scrollWheelZoom={false} className="size-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
